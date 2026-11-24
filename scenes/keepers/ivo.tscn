@@ -1,0 +1,47 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/keepers/keeper_controller.gd" id="1_keeper"]
+[ext_resource type="Script" path="res://scripts/components/shadow_component.gd" id="2_shadow"]
+
+[sub_resource type="RectangleShape2D" id="KeeperShape"]
+size = Vector2(14, 16)
+
+[sub_resource type="CircleShape2D" id="ProbeShape"]
+radius = 28.0
+
+[sub_resource type="Gradient" id="LanternGradient"]
+colors = PackedColorArray(1, 1, 1, 1, 1, 1, 1, 0)
+
+[sub_resource type="GradientTexture2D" id="LanternTexture"]
+gradient = SubResource("LanternGradient")
+width = 256
+height = 256
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="Ivo" type="CharacterBody2D"]
+script = ExtResource("1_keeper")
+body_color = Color(0.788, 0.651, 0.42, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -8)
+shape = SubResource("KeeperShape")
+
+[node name="InteractionProbe" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractionProbe"]
+position = Vector2(0, -8)
+shape = SubResource("ProbeShape")
+
+[node name="ShadowComponent" type="Node" parent="."]
+script = ExtResource("2_shadow")
+
+[node name="Lantern" type="PointLight2D" parent="."]
+position = Vector2(0, -12)
+texture = SubResource("LanternTexture")
+texture_scale = 0.75
+color = Color(1, 0.721, 0.302, 1)
+energy = 1.0
+shadow_enabled = true
+shadow_filter = 1

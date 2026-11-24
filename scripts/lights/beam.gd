@@ -16,6 +16,8 @@ var _target_angle := 0.0
 var _sweep_to_max := true
 var _pause_left := 0.0
 var _lamp_room: Area2D = null
+var _last_operator: Node = null
+var _last_controlled := true
 
 func _ready() -> void:
 	add_to_group("daylight_fields")
@@ -24,6 +26,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	_refresh_operator()
+	_sync_operator_control()
 	if input_enabled:
 		focused = Input.is_action_pressed("focus")
 	if not is_beam_on():
@@ -150,6 +153,14 @@ func _refresh_operator() -> void:
 		if body is CharacterBody2D and body.is_in_group("persons"):
 			operator = body
 			return
+
+func _sync_operator_control() -> void:
+	if operator == null:
+		return
+	if operator != _last_operator or operator.controlled != _last_controlled:
+		_last_operator = operator
+		_last_controlled = operator.controlled
+		manual_control = operator.controlled
 
 func _bind_focus() -> void:
 	if not InputMap.has_action("focus"):

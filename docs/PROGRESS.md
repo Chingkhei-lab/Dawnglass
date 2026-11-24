@@ -4,10 +4,10 @@
 > Status: ✅ done (tested in a real run) · 🟡 in progress · ⬜ not started · ⛔ blocked
 
 ## Current status
-- **Current module:** M5: The lighthouse beam ✅ complete and tested in a real run
-- **Next step:** M6: Switching keepers (after the human's go-ahead)
+- **Current module:** M6: Switching keepers ✅ complete and tested in a real run
+- **Next step:** 🚦 Gate 1: the human plays a test night (M1–M6) and gives feedback in "Playtest notes"
 - **Godot version installed:** 4.7.2.stable.official.ed1daf0bf (via Godot MCP `get_godot_version`; renderer Forward+, D3D12, AMD Radeon Graphics)
-- **Waiting on the human for:** go-ahead to start M6
+- **Waiting on the human for:** Gate 1 playtest approval before M7
 
 ---
 
@@ -21,7 +21,7 @@
 | M3: Lights and shadows | ✅ | Lantern `PointLight2D` with cast shadows and no gameplay effect; Glint bursts with charges, shadow cost and a wall-aware `DaylightCheck` raycast; `ShadowComponent` with value/maximum, exposure loss, sunlight recovery, the 30% maximum drop and the three visible stages. 26 checks pass; three-minute windowed run clean; M1/M2 re-verified. |
 | M4: Creatures (2 types) | ✅ | Walker chases the nearest person; Lurker waits in dark and rushes a nearby person or a lit lantern within its notice range; both ignore lantern light; Glint daylight destroys them; contact turns a person into a GameState-marked Sleeper and fires `person_taken`; keeper shadow leans toward nearby creatures. 22 checks pass; windowed run includes a 40-creature FPS sample. |
 | M5: The lighthouse beam | ✅ | Staffed lamp room drives a daylight beam with mouse/right-stick aim, limited turn speed and acceleration (240 deg/s² to 90 deg/s), a focused narrow mode, a predictable auto sweep with a 120° gap, and a rock-occluded cone; the beam drains stored Dawnglass and the operator's shadow, and the Dawn Pulse ring destroys creatures at a large charge/shadow cost. 31 checks pass; three-minute windowed run clean. |
-| M6: Switching keepers | ⬜ | |
+| M6: Switching keepers | ✅ | Two keepers (Maren, Ivo) with Tab / gamepad Y switching at any time; the camera glides to the new keeper; the keeper left in the lamp room keeps the beam sweeping on auto while a street keeper stands guard; both keepers' shadows keep updating (exposure/recovery) while uncontrolled. 22 checks pass. |
 | 🚦 Gate 1: Is the core fun? | ⬜ | Needs the human to play |
 | M7: Townsfolk, the Hall and promises | ⬜ | |
 | M8: Hollow houses | ⬜ | |
@@ -30,14 +30,14 @@
 | 🚦 Gate 2: The slice | ⬜ | Needs the human to play |
 
 ### Tests for the current module
-- ✅ Beam is a daylight field; a keeper inside the lamp room operates it; the focus action is registered; it starts under player control.
-- ✅ Turn weight: 240 deg/s² first-frame acceleration, no snap (0.07° in one frame), settles on the aim angle (0.00° off), top speed 90 deg/s — all from tuning.
-- ✅ Daylight check: clears a point 140 px out, is blocked by the rock, respects the 320 px range and the 10° cone; the lamp room itself is exempt so the operator is not lit by their own beam.
-- ✅ Costs: 0.005 Dawnglass and 0.02 operator shadow over 2 s; the beam stops at zero Dawnglass and never goes negative; it resumes when charge returns.
-- ✅ Auto sweep: stays within 30–150°, reaches both ends, reverses exactly once per leg, pauses 1 s at ends, and never lights the gap sector.
-- ✅ Dawn Pulse: fires, spends 0.50 Dawnglass and 0.20 operator shadow immediately, destroys the creatures at 150 px and 250 px, spares the one at 500 px, and clears its field.
-- ✅ Readout shows beam angle, mode, focus, Dawnglass and operator shadow.
-- ✅ Three-minute windowed run: 31/31 PASS, `M5 RUNTIME CHECK COMPLETE`, no `ERROR`/`WARNING` lines. The runtime auto-sweeps and spawns Walkers into the sweep for a live beam-kill demo. M1 (16/16), M2 (13/13), M3 (26/26) and M4 (22/22) re-run with no regressions.
+- ✅ Two keepers registered; Maren starts controlled; camera follows her; the staffed lamp room is in manual mode; the switch action is bound.
+- ✅ One-button switch moves control to Ivo, retargets the camera, and puts the left-behind Maren's beam into auto: it swept 44.5° in 1.5 s while the camera glided 306.1 → 0.0 px to Ivo; Maren stayed put.
+- ✅ Switching mid-movement: Ivo moved 40 px, switch stopped him in place (< 0.5 px drift) while Maren immediately took over and moved 40 px with the same held input.
+- ✅ Both shadows update while one is uncontrolled: in a 2 s Glint both Maren (controlled) and Ivo (uncontrolled) dropped 1.00 → 0.90.
+- ✅ Switching inside the lamp room works: control returns to Maren, beam back to manual, camera back on her, and Ivo on the street keeps guarding.
+- ✅ Readout shows the active keeper and both shadow values.
+- ✅ Three-minute windowed run: 22/22 PASS, `M6 RUNTIME CHECK COMPLETE`, no `ERROR`/`WARNING` lines. The runtime leaves Ivo controlled on the street so Maren keeps the beam sweeping, with Walkers spawned into the sweep. M1 (16/16), M2 (13/13), M3 (26/26), M4 (22/22) and M5 (31/31) re-run with no regressions.
+- 🚦 Gate 1 needs the human to play and record feedback in "Playtest notes".
 
 ---
 
@@ -64,6 +64,9 @@
 | 2026-11-24 | GAME_BIBLE §6.2 | The "slow, predictable sweep with gaps" has no pattern, limits or pause. | Triangle sweep 30–150° at 30°/s with a 1 s pause at each end; the 120° sector outside those limits is the permanent gap. M6 will drive auto mode when the player switches keepers. | Open |
 | 2026-11-24 | GAME_BIBLE §6.3 | Dawn Pulse radius, duration, ring width and costs are not specified. | 320 px radius expanding over 1.2 s in a 14 px band; 0.50 stored Dawnglass and 0.20 operator shadow per use. | Open |
 | 2026-11-24 | GAME_BIBLE §6.2 | Whether the operator is lit by the beam they are aiming is not stated. | Points within the 24 px lamp-room radius are exempt, so the beam drains the operator only through its explicit cost, never twice. | Open |
+| 2026-11-24 | AGENT_BUILD_GUIDE §5 M6 / GAME_BIBLE §7.1 | The one-button switch key is not specified. | Tab on keyboard, Y on gamepad (provisional). | Open |
+| 2026-11-24 | AGENT_BUILD_GUIDE §5 M6 | What "keeps doing their last job" means for an idle street keeper is not defined. | The uncontrolled keeper stops in place and keeps their lantern state ("standing guard"); no path-following yet. | Open |
+| 2026-11-24 | GAME_BIBLE §7.1 | Whether a taken keeper can be switched to is not stated. | Switching does not check Sleeper state yet; a taken keeper simply ignores input. | Open |
 
 ## Decisions made
 | Date | Decision | Why |
@@ -87,6 +90,10 @@
 | 2026-11-24 | The beam joins `daylight_fields` while staffed, but exempts the lamp-room radius. | Creatures die through the same `DaylightCheck` path used by the Glint; the operator's loss is paid once, by the beam's explicit drain. |
 | 2026-11-24 | Turning uses a braking clamp (`sqrt(2 * accel * distance)`) on top of the speed limit. | Without it the beam overshot the aim angle by tens of degrees and oscillated; now it settles exactly. |
 | 2026-11-24 | Dawn Pulse is an expanding annulus field; costs are paid on fire. | Matches "ring of daylight" and keeps the cost check exact, independent of ring travel. |
+| 2026-11-24 | `run/main_scene` points at `scenes/debug/m6_switch.tscn` during M6. | Same main-scene convention as earlier modules. |
+| 2026-11-24 | Switching is a scene-level manager (`KeeperSwitch`) that flips `controlled` on keepers and retargets the follow camera. | Keeps the controller small and leaves room for the real game to place one manager; camera gained `set_target()`. |
+| 2026-11-24 | An uncontrolled keeper stops in place but keeps `_update_shadow()` running. | "Keeps doing their last job" for a street keeper is standing guard; exposure still applies, which Gate 1 needs. |
+| 2026-11-24 | The beam switches mode only when its operator or their `controlled` flag changes. | Auto sweep continues while the player watches elsewhere, without fighting direct mode changes from debug harnesses. |
 
 ## Known bugs
 | Date found | Bug | Status |
@@ -98,6 +105,7 @@
 | 2026-11-24 | `shadow_lean()` failed to parse: `nearest` was typed `Node`, so `(nearest.global_position - global_position)` had no inferred type. | Fixed: keep the nearest creature in a `Node2D` variable (cast from the group array). |
 | 2026-11-24 | First beam steering overshot the target by tens of degrees and oscillated (speed cap applied without braking distance). | Fixed: desired speed is also clamped to `sqrt(2 * accel * |delta angle|)`. |
 | 2026-11-24 | M5 readout and test failed to parse on `shadow.value` / `get_node_or_null` results typed as Variant. | Fixed: explicit `Node` and `float` annotations. |
+| 2026-11-24 | M6 step-3 burst cleanup freed every `daylight_fields` node, including the beam, so later steps hit a freed instance. | Fixed: the debug helper skips the beam. |
 
 ## Playtest notes (from the human)
 _Feedback from each 🚦 gate goes here._
@@ -118,3 +126,4 @@ _Feedback from each 🚦 gate goes here._
 | 2026-11-24 | M3 completed. Added `DaylightCheck` (range + angle + wall raycast), `ShadowComponent` (value/maximum, exposure loss, sunlight recovery, the 30% maximum drop, stage and flicker alphas), a cast-shadow lantern `PointLight2D`, Glint bursts with charges and shadow cost, the reusable `maren.tscn` keeper, `shadow_readout.gd`, `scenes/debug/m3_lights.tscn` and a 26-check harness. 26/26 PASS headless and windowed; three-minute runtime clean; M1 (16/16) and M2 (13/13) re-run with no regressions. | Wait for the human's go-ahead, then M4. |
 | 2026-11-24 | M4 completed. Added `creature_base.gd` (group registration, daylight death via `daylight_fields`, nearest-person search, distance contact), `walker.gd` (chases nearest person), `lurker.gd` (hidden until a person enters 120 px or a lit lantern enters 140 px), a `persons` protocol (`is_takeable`/`take_shadow`) on the keeper plus `villager.tscn`, `GameState.sleepers` with `mark_sleeper`, keeper shadow lean, `creature_readout.gd`, `scenes/debug/m4_creatures.tscn` and a 22-check harness; windowed runtime adds a 40-creature FPS sample. 22/22 PASS headless and windowed. | Wait for the human's go-ahead, then M5. |
 | 2026-11-24 | M5 completed. Added `beam.gd` (lamp-room staffing, mouse/right-stick aim with speed and acceleration limits plus braking, focus mode, clamped auto sweep with end pauses, cone/range/occlusion daylight check, Dawnglass and operator drain) and `dawn_pulse.gd` (expanding annulus daylight ring with charge/shadow cost), lighthouse debug scene with a rock occluder, `beam_readout.gd` and a 31-check harness. 31/31 PASS headless; three-minute windowed runtime clean with Walkers spawned into the sweeping beam. | Wait for the human's go-ahead, then M6 (Gate 1 comes after M6). |
+| 2026-11-24 | M6 completed. Added the `controlled` flag and `body_color` to the keeper controller, `ivo.tscn`, a scene-level `KeeperSwitch` (Tab / gamepad Y, camera retarget via new `FollowCamera.set_target()`), beam mode sync to the operator's control state, `switch_readout.gd`, `scenes/debug/m6_switch.tscn` and a 22-check harness. 22/22 PASS headless; three-minute windowed runtime clean. | 🚦 Gate 1: human plays a test night and gives feedback before M7. |

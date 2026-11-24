@@ -26,16 +26,19 @@ const BUTTON_BINDINGS := [
 ]
 
 @export var speed_path := "movement.keeper_speed"
+@export var body_color := Color("#7CA5B8")
 @onready var interaction_probe: Area2D = $InteractionProbe
 
 var glint_charges := 0
 var taken := false
+var controlled := true
 var _shadow: Node = null
 var _lantern: PointLight2D = null
 var _elapsed := 0.0
 
 func _ready() -> void:
 	add_to_group("persons")
+	add_to_group("keepers")
 	_bind_input()
 	_shadow = get_node_or_null("ShadowComponent")
 	_lantern = get_node_or_null("Lantern") as PointLight2D
@@ -47,15 +50,18 @@ func _physics_process(delta: float) -> void:
 		queue_redraw()
 		return
 	_elapsed += delta
-	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
-	velocity = direction * float(Data.require_value(speed_path))
-	move_and_slide()
-	if Input.is_action_just_pressed("interact"):
-		try_interact()
-	if Input.is_action_just_pressed("lantern"):
-		set_lantern(not is_lantern_on())
-	if Input.is_action_just_pressed("glint"):
-		fire_glint()
+	if controlled:
+		var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
+		velocity = direction * float(Data.require_value(speed_path))
+		move_and_slide()
+		if Input.is_action_just_pressed("interact"):
+			try_interact()
+		if Input.is_action_just_pressed("lantern"):
+			set_lantern(not is_lantern_on())
+		if Input.is_action_just_pressed("glint"):
+			fire_glint()
+	else:
+		velocity = Vector2.ZERO
 	_update_shadow(delta)
 	queue_redraw()
 
@@ -198,7 +204,7 @@ func _draw() -> void:
 		_ellipse(lean, Vector2(9.0 + lean.length() * 0.25, 3.5)),
 		Color(0.078, 0.106, 0.161, shadow_alpha)
 	)
-	draw_rect(Rect2(-7, -18, 14, 18), Color("#7CA5B8"))
+	draw_rect(Rect2(-7, -18, 14, 18), body_color)
 	draw_circle(Vector2(0, -22), 7.0, Color("#F4F7FA"))
 
 func _ellipse(center: Vector2, radii: Vector2) -> PackedVector2Array:
