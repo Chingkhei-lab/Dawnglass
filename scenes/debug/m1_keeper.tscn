@@ -1,0 +1,127 @@
+[gd_scene load_steps=12 format=3]
+
+[ext_resource type="Script" path="res://scripts/debug/m1_test.gd" id="1_test"]
+[ext_resource type="Script" path="res://scripts/keepers/keeper_controller.gd" id="2_keeper"]
+[ext_resource type="Script" path="res://scripts/components/interactable.gd" id="3_sign"]
+[ext_resource type="Script" path="res://scripts/world/follow_camera.gd" id="4_camera"]
+[ext_resource type="Script" path="res://scripts/ui/text_box.gd" id="5_textbox"]
+
+[sub_resource type="RectangleShape2D" id="KeeperShape"]
+size = Vector2(14, 16)
+
+[sub_resource type="RectangleShape2D" id="HouseShape"]
+size = Vector2(100, 70)
+
+[sub_resource type="RectangleShape2D" id="WallHShape"]
+size = Vector2(1024, 16)
+
+[sub_resource type="RectangleShape2D" id="WallVShape"]
+size = Vector2(16, 640)
+
+[sub_resource type="CircleShape2D" id="SignShape"]
+radius = 16.0
+
+[sub_resource type="CircleShape2D" id="ProbeShape"]
+radius = 28.0
+
+[node name="M1KeeperDebug" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_test")
+
+[node name="Background" type="Polygon2D" parent="."]
+z_index = -10
+polygon = PackedVector2Array(0, 0, 1024, 0, 1024, 640, 0, 640)
+color = Color(0.086, 0.145, 0.2, 1)
+
+[node name="TopWall" type="StaticBody2D" parent="."]
+position = Vector2(512, 8)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="TopWall"]
+shape = SubResource("WallHShape")
+
+[node name="BottomWall" type="StaticBody2D" parent="."]
+position = Vector2(512, 632)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="BottomWall"]
+shape = SubResource("WallHShape")
+
+[node name="LeftWall" type="StaticBody2D" parent="."]
+position = Vector2(8, 320)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeftWall"]
+shape = SubResource("WallVShape")
+
+[node name="RightWall" type="StaticBody2D" parent="."]
+position = Vector2(1016, 320)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="RightWall"]
+shape = SubResource("WallVShape")
+
+[node name="House" type="StaticBody2D" parent="."]
+position = Vector2(560, 260)
+
+[node name="Body" type="Polygon2D" parent="House"]
+polygon = PackedVector2Array(-50, -70, 50, -70, 50, 0, -50, 0)
+color = Color(0.149, 0.231, 0.302, 1)
+
+[node name="Roof" type="Polygon2D" parent="House"]
+polygon = PackedVector2Array(-58, -70, 58, -70, 0, -98)
+color = Color(0.106, 0.231, 0.267, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="House"]
+position = Vector2(0, -35)
+shape = SubResource("HouseShape")
+
+[node name="Sign" type="Area2D" parent="."]
+position = Vector2(400, 360)
+script = ExtResource("3_sign")
+interaction_text = "The sign reads: LIGHTHOUSE - KEEP THE STREET LIT."
+
+[node name="Post" type="Polygon2D" parent="Sign"]
+polygon = PackedVector2Array(-2, -28, 2, -28, 2, 0, -2, 0)
+color = Color(0.149, 0.231, 0.302, 1)
+
+[node name="Board" type="Polygon2D" parent="Sign"]
+polygon = PackedVector2Array(-12, -46, 12, -46, 12, -28, -12, -28)
+color = Color(1, 0.721, 0.302, 1)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Sign"]
+position = Vector2(0, -36)
+shape = SubResource("SignShape")
+
+[node name="Keeper" type="CharacterBody2D" parent="."]
+position = Vector2(300, 320)
+script = ExtResource("2_keeper")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Keeper"]
+position = Vector2(0, -8)
+shape = SubResource("KeeperShape")
+
+[node name="InteractionProbe" type="Area2D" parent="Keeper"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Keeper/InteractionProbe"]
+position = Vector2(0, -8)
+shape = SubResource("ProbeShape")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("4_camera")
+target_path = NodePath("../Keeper")
+
+[node name="TextBox" type="CanvasLayer" parent="."]
+script = ExtResource("5_textbox")
+
+[node name="Panel" type="ColorRect" parent="TextBox"]
+offset_left = 32.0
+offset_top = 280.0
+offset_right = 608.0
+offset_bottom = 344.0
+color = Color(0.078, 0.106, 0.161, 0.95)
+
+[node name="Label" type="Label" parent="TextBox/Panel"]
+offset_left = 14.0
+offset_top = 10.0
+offset_right = 562.0
+offset_bottom = 54.0
+theme_override_colors/font_color = Color(0.957, 0.969, 0.98, 1)
+theme_override_font_sizes/font_size = 16
+autowrap_mode = 3

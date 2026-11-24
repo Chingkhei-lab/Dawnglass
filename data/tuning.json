@@ -1,0 +1,17 @@
+{
+  "project": {
+    "base_width": 640,
+    "base_height": 360,
+    "physics_ticks_per_second": 60
+  },
+  "movement": {
+    "keeper_speed": 80.0
+  },
+  "camera": {
+    "follow_speed": 8.0
+  },
+  "lighting": {
+    "lantern_radius": 96.0,
+    "glint_charges": 3
+  }
+}
