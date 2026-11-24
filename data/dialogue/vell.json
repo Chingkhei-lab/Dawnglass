@@ -1,0 +1,16 @@
+{
+  "speaker": "Sister Vell",
+  "text": "The records are clear: light holds them back. The Hall keeps us safe, but my chapel stands empty. Will you keep its lamp lit tonight?",
+  "choices": [
+    {
+      "text": "I promise.",
+      "promise": true,
+      "trust": 1,
+      "bond": 1
+    },
+    {
+      "text": "The Hall will have to do.",
+      "trust": -1
+    }
+  ]
+}

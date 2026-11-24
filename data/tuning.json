@@ -61,7 +61,19 @@
     "pulse_dawnglass_cost": 0.5,
     "pulse_shadow_cost": 0.2
   },
-  "shadow": {    "starting": 1.0,
+  "townsfolk": {
+    "walk_speed": 60.0,
+    "arrive_radius": 4.0
+  },
+  "promise": {
+    "lit_radius": 72.0,
+    "lit_seconds": 10.0,
+    "trust_kept": 2,
+    "trust_broken": -2,
+    "max_shadow_bonus": 0.1
+  },
+  "shadow": {
+    "starting": 1.0,
     "maximum": 1.0,
     "dawnglass_loss_rate": 0.05,
     "sunlight_recovery_rate": 0.02,

@@ -3,6 +3,8 @@ extends Node
 @warning_ignore("unused_signal")
 signal day_started
 @warning_ignore("unused_signal")
+signal dusk_started
+@warning_ignore("unused_signal")
 signal night_started
 @warning_ignore("unused_signal")
 signal dawn
@@ -12,3 +14,5 @@ signal keeper_switched
 signal person_taken
 @warning_ignore("unused_signal")
 signal promise_kept
+@warning_ignore("unused_signal")
+signal promise_broken

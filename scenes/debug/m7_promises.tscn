@@ -1,0 +1,158 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/debug/m7_test.gd" id="1_test"]
+[ext_resource type="PackedScene" path="res://scenes/keepers/maren.tscn" id="2_maren"]
+[ext_resource type="PackedScene" path="res://scenes/townsfolk/townsfolk_npc.tscn" id="3_npc"]
+[ext_resource type="Script" path="res://scripts/world/follow_camera.gd" id="4_camera"]
+[ext_resource type="Script" path="res://scripts/world/day_night_tint.gd" id="5_tint"]
+[ext_resource type="Script" path="res://scripts/world/promise_board.gd" id="6_board"]
+[ext_resource type="Script" path="res://scripts/ui/dialogue_box.gd" id="7_dialogue"]
+[ext_resource type="Script" path="res://scripts/ui/promise_readout.gd" id="8_readout"]
+
+[node name="M7PromisesDebug" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_test")
+
+[node name="Background" type="Polygon2D" parent="."]
+z_index = -10
+polygon = PackedVector2Array(0, 0, 1024, 0, 1024, 640, 0, 640)
+color = Color(0.086, 0.145, 0.2, 1)
+
+[node name="Ground" type="Polygon2D" parent="."]
+z_index = -9
+polygon = PackedVector2Array(0, 300, 1024, 300, 1024, 640, 0, 640)
+color = Color(0.106, 0.231, 0.267, 1)
+
+[node name="Hall" type="Node2D" parent="." groups=["hall"]]
+position = Vector2(512, 240)
+
+[node name="Walls" type="Polygon2D" parent="Hall"]
+polygon = PackedVector2Array(-46, 0, 46, 0, 46, 64, -46, 64)
+color = Color(0.42, 0.47, 0.53, 1)
+
+[node name="Roof" type="Polygon2D" parent="Hall"]
+polygon = PackedVector2Array(-56, 0, 56, 0, 0, -34)
+color = Color(0.322, 0.361, 0.42, 1)
+
+[node name="Door" type="Polygon2D" parent="Hall"]
+polygon = PackedVector2Array(-9, 30, 9, 30, 9, 64, -9, 64)
+color = Color(1, 0.721, 0.302, 1)
+
+[node name="OdileHouse" type="Node2D" parent="."]
+position = Vector2(380, 440)
+
+[node name="Walls" type="Polygon2D" parent="OdileHouse"]
+polygon = PackedVector2Array(-28, 0, 28, 0, 28, 34, -28, 34)
+color = Color(0.4, 0.322, 0.278, 1)
+
+[node name="Roof" type="Polygon2D" parent="OdileHouse"]
+polygon = PackedVector2Array(-34, 0, 34, 0, 0, -20)
+color = Color(0.302, 0.227, 0.208, 1)
+
+[node name="VellHouse" type="Node2D" parent="."]
+position = Vector2(700, 440)
+
+[node name="Walls" type="Polygon2D" parent="VellHouse"]
+polygon = PackedVector2Array(-28, 0, 28, 0, 28, 34, -28, 34)
+color = Color(0.322, 0.376, 0.443, 1)
+
+[node name="Roof" type="Polygon2D" parent="VellHouse"]
+polygon = PackedVector2Array(-34, 0, 34, 0, 0, -20)
+color = Color(0.243, 0.286, 0.345, 1)
+
+[node name="FerrowHouse" type="Node2D" parent="."]
+position = Vector2(150, 440)
+
+[node name="Walls" type="Polygon2D" parent="FerrowHouse"]
+polygon = PackedVector2Array(-28, 0, 28, 0, 28, 34, -28, 34)
+color = Color(0.365, 0.361, 0.337, 1)
+
+[node name="Roof" type="Polygon2D" parent="FerrowHouse"]
+polygon = PackedVector2Array(-34, 0, 34, 0, 0, -20)
+color = Color(0.263, 0.259, 0.243, 1)
+
+[node name="Odile" parent="." instance=ExtResource("3_npc")]
+position = Vector2(380, 470)
+npc_id = "odile"
+display_name = "Odile"
+body_color = Color(0.851, 0.627, 0.4, 1)
+
+[node name="Vell" parent="." instance=ExtResource("3_npc")]
+position = Vector2(700, 470)
+npc_id = "vell"
+display_name = "Sister Vell"
+body_color = Color(0.718, 0.784, 0.855, 1)
+
+[node name="Ferrow" parent="." instance=ExtResource("3_npc")]
+position = Vector2(150, 470)
+npc_id = "ferrow"
+display_name = "Old Ferrow"
+stubborn = true
+body_color = Color(0.663, 0.671, 0.702, 1)
+
+[node name="Maren" parent="." instance=ExtResource("2_maren")]
+position = Vector2(300, 360)
+
+[node name="Camera2D" type="Camera2D" parent="."]
+script = ExtResource("4_camera")
+target_path = NodePath("../Maren")
+
+[node name="PromiseBoard" type="Node" parent="."]
+script = ExtResource("6_board")
+
+[node name="Tint" type="CanvasModulate" parent="."]
+script = ExtResource("5_tint")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="Panel" type="ColorRect" parent="UI"]
+offset_left = 12.0
+offset_top = 12.0
+offset_right = 628.0
+offset_bottom = 44.0
+color = Color(0.078, 0.106, 0.161, 0.9)
+
+[node name="Readout" type="Label" parent="UI/Panel"]
+offset_left = 10.0
+offset_top = 6.0
+offset_right = 606.0
+offset_bottom = 26.0
+theme_override_colors/font_color = Color(0.957, 0.969, 0.98, 1)
+theme_override_font_sizes/font_size = 12
+script = ExtResource("8_readout")
+
+[node name="DialogueBox" type="CanvasLayer" parent="."]
+layer = 2
+script = ExtResource("7_dialogue")
+
+[node name="Panel" type="ColorRect" parent="DialogueBox"]
+offset_left = 24.0
+offset_top = 196.0
+offset_right = 616.0
+offset_bottom = 348.0
+color = Color(0.078, 0.106, 0.161, 0.95)
+
+[node name="Speaker" type="Label" parent="DialogueBox/Panel"]
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 580.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(1, 0.721, 0.302, 1)
+theme_override_font_sizes/font_size = 14
+
+[node name="Body" type="Label" parent="DialogueBox/Panel"]
+offset_left = 12.0
+offset_top = 34.0
+offset_right = 580.0
+offset_bottom = 100.0
+theme_override_colors/font_color = Color(0.957, 0.969, 0.98, 1)
+theme_override_font_sizes/font_size = 11
+autowrap_mode = 3
+
+[node name="Choices" type="Label" parent="DialogueBox/Panel"]
+offset_left = 12.0
+offset_top = 106.0
+offset_right = 580.0
+offset_bottom = 148.0
+theme_override_colors/font_color = Color(0.718, 0.812, 0.871, 1)
+theme_override_font_sizes/font_size = 11

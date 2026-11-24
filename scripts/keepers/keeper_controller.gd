@@ -69,7 +69,9 @@ func try_interact() -> bool:
 	var target := _nearest_interactable()
 	if target == null:
 		return false
-	interacted.emit(target.interact())
+	var text: String = target.interact()
+	if text != "":
+		interacted.emit(text)
 	return true
 
 func set_lantern(enabled: bool) -> void:

@@ -4,10 +4,10 @@
 > Status: ✅ done (tested in a real run) · 🟡 in progress · ⬜ not started · ⛔ blocked
 
 ## Current status
-- **Current module:** M6: Switching keepers ✅ complete and tested in a real run
-- **Next step:** 🚦 Gate 1: the human plays a test night (M1–M6) and gives feedback in "Playtest notes"
+- **Current module:** M7: Townsfolk, the Hall and promises ✅ complete and tested in a real run
+- **Next step:** M8: Hollow houses
 - **Godot version installed:** 4.7.2.stable.official.ed1daf0bf (via Godot MCP `get_godot_version`; renderer Forward+, D3D12, AMD Radeon Graphics)
-- **Waiting on the human for:** Gate 1 playtest approval before M7
+- **Waiting on the human for:** nothing; 🚦 Gate 1 was approved in conversation without written notes
 
 ---
 
@@ -22,22 +22,23 @@
 | M4: Creatures (2 types) | ✅ | Walker chases the nearest person; Lurker waits in dark and rushes a nearby person or a lit lantern within its notice range; both ignore lantern light; Glint daylight destroys them; contact turns a person into a GameState-marked Sleeper and fires `person_taken`; keeper shadow leans toward nearby creatures. 22 checks pass; windowed run includes a 40-creature FPS sample. |
 | M5: The lighthouse beam | ✅ | Staffed lamp room drives a daylight beam with mouse/right-stick aim, limited turn speed and acceleration (240 deg/s² to 90 deg/s), a focused narrow mode, a predictable auto sweep with a 120° gap, and a rock-occluded cone; the beam drains stored Dawnglass and the operator's shadow, and the Dawn Pulse ring destroys creatures at a large charge/shadow cost. 31 checks pass; three-minute windowed run clean. |
 | M6: Switching keepers | ✅ | Two keepers (Maren, Ivo) with Tab / gamepad Y switching at any time; the camera glides to the new keeper; the keeper left in the lamp room keeps the beam sweeping on auto while a street keeper stands guard; both keepers' shadows keep updating (exposure/recovery) while uncontrolled. 22 checks pass. |
-| 🚦 Gate 1: Is the core fun? | 🟡 | Waiting on the human: play the current main scene (M1–M6 test night) and write feedback in "Playtest notes". Do not start M7 until approved or given changes. |
-| M7: Townsfolk, the Hall and promises | ⬜ | |
+| 🚦 Gate 1: Is the core fun? | ✅ | Approved in conversation (the human said "lets proceed") without written playtest notes; M7 started on that approval. |
+| M7: Townsfolk, the Hall and promises | ✅ | Three townsfolk (Odile, Sister Vell, Old Ferrow) with a dusk routine: Odile and Vell walk to the Hall while stubborn Ferrow stays home; talking before night opens a data-driven dialogue box whose promise is tracked through the night (lantern or beam on the home) and settled at dawn as kept or broken, changing trust and, when kept, raising the promising keeper's maximum shadow. 31 checks pass; three-minute windowed run clean. |
 | M8: Hollow houses | ⬜ | |
 | M9: Dawn summary, HUD and saving | ⬜ | |
 | M10: The first playable slice | ⬜ | |
 | 🚦 Gate 2: The slice | ⬜ | Needs the human to play |
 
 ### Tests for the current module
-- ✅ Two keepers registered; Maren starts controlled; camera follows her; the staffed lamp room is in manual mode; the switch action is bound.
-- ✅ One-button switch moves control to Ivo, retargets the camera, and puts the left-behind Maren's beam into auto: it swept 44.5° in 1.5 s while the camera glided 306.1 → 0.0 px to Ivo; Maren stayed put.
-- ✅ Switching mid-movement: Ivo moved 40 px, switch stopped him in place (< 0.5 px drift) while Maren immediately took over and moved 40 px with the same held input.
-- ✅ Both shadows update while one is uncontrolled: in a 2 s Glint both Maren (controlled) and Ivo (uncontrolled) dropped 1.00 → 0.90.
-- ✅ Switching inside the lamp room works: control returns to Maren, beam back to manual, camera back on her, and Ivo on the street keeps guarding.
-- ✅ Readout shows the active keeper and both shadow values.
-- ✅ Three-minute windowed run: 22/22 PASS, `M6 RUNTIME CHECK COMPLETE`, no `ERROR`/`WARNING` lines. The runtime leaves Ivo controlled on the street so Maren keeps the beam sweeping, with Walkers spawned into the sweep. M1 (16/16), M2 (13/13), M3 (26/26), M4 (22/22) and M5 (31/31) re-run with no regressions.
-- 🚦 Gate 1 needs the human to play and record feedback in "Playtest notes".
+- ✅ Structure: three townsfolk registered, all three dialogue data files present, `dusk_started` / `promise_broken` signals registered, an empty promise board, and a closed dialogue box.
+- ✅ Dusk routine: Odile and Sister Vell both arrive exactly at the Hall (0.0 / 0.0 px) after a real journey, while Old Ferrow stays at his home more than 100 px from the Hall.
+- ✅ Talking to Odile opens the data-driven box; the promise line applies trust from `data/dialogue/odile.json` (+1), records a bond and creates a promise tied to Maren.
+- ✅ The lantern keeps Odile's home lit for 10.5 s of the required 10.0 s during the night.
+- ✅ At dawn the kept promise adds the tuned trust (+2), raises Maren's maximum shadow 0.80 → 0.90, clears the promise and emits `promise_kept`.
+- ✅ A second promise to Vell, left unlit, costs the tuned trust (−2) at dawn, emits `promise_broken`, and leaves the maximum unchanged.
+- ✅ A promise choice at night is refused with "It is too late tonight." and changes neither trust nor promises.
+- ✅ Readout shows trust and pending promises.
+- ✅ Three-minute windowed run: 31/31 PASS, `M7 RUNTIME CHECK COMPLETE`, no `ERROR`/`WARNING` lines. The runtime covers three sped-up day/night cycles with the townsfolk routines. M1 (16/16), M2 (13/13), M3 (26/26), M4 (22/22), M5 (31/31) and M6 (22/22) re-run with no regressions.
 
 ---
 
@@ -68,6 +69,14 @@
 | 2026-11-24 | AGENT_BUILD_GUIDE §5 M6 | What "keeps doing their last job" means for an idle street keeper is not defined. | The uncontrolled keeper stops in place and keeps their lantern state ("standing guard"); no path-following yet. | Open |
 | 2026-11-24 | GAME_BIBLE §7.1 | Whether a taken keeper can be switched to is not stated. | Switching does not check Sleeper state yet; a taken keeper simply ignores input. | Open |
 | 2026-11-24 | GAME_BIBLE §6.3 | No input is specified for the Dawn Pulse. | Currently method-only (`Beam.fire_dawn_pulse()`, exercised by the M5 harness); bind to a key together with the HUD in M9. | Open |
+| 2026-11-24 | AGENT_BUILD_GUIDE §5 M7 / GAME_BIBLE §7.3 | "Keep my home lit" has no lighting rule, radius or duration. | A promised home counts as lit while a keeper with the lantern on stands within 72 px or any daylight field covers it; 10 s of lit night time keeps the promise. | Open |
+| 2026-11-24 | GAME_BIBLE §7.3 | Trust/bond amounts and the size of the maximum-shadow reward are not given. | Dialogue JSON carries per-choice trust/bond/flag values; tuning `promise` carries kept +2 / broken −2 trust and +0.10 maximum shadow, capped at 1.0. | Open |
+| 2026-11-24 | AGENT_BUILD_GUIDE §5 M7 | Dialogue box controls and layout are unspecified. | Number keys 1–3 pick a line (plus `choose()` for tests); keyboard only, with no mouse or gamepad navigation yet. | Open |
+| 2026-11-24 | AGENT_BUILD_GUIDE §5 M7 | Daily routines are unspecified beyond "walk to the Hall". | Straight-line walk at 60 px/s to the `hall` group at dusk and back home at dawn; Ferrow is flagged `stubborn` and skips the dusk walk. No paths, doors or collision avoidance. | Open |
+| 2026-11-24 | AGENT_BUILD_GUIDE §5 M7 | Whether a promise home must be lit continuously, at dawn, or only once is not stated. | Accumulated lit time (10 s) at any point during the night; this rewards a brief visit, so revisit it during M10 tuning. | Open |
+| 2026-11-24 | GAME_BIBLE §7.2 | Which keeper gains the raised maximum shadow after a kept promise is not stated. | The keeper who accepted the promise gains it at dawn even if the player switched away; a missing keeper skips only the reward. | Open |
+| 2026-11-24 | GAME_BIBLE §7.4 | Whether townsfolk can be taken by creatures in this slice is not stated. | Townsfolk are interactable `Area2D`s but stay out of the `persons` group, so creatures ignore them; they join the person protocol with Hollow Houses. | Open |
+| 2026-11-24 | AGENT_BUILD_GUIDE §5 M7 | No dusk signal existed, and promise settlement needed a broken-promise counterpart. | Added `Events.dusk_started` (emitted by `Clock` on entering dusk) and `Events.promise_broken`; `promise_kept` already existed. | Open |
 
 ## Decisions made
 | Date | Decision | Why |
@@ -95,6 +104,11 @@
 | 2026-11-24 | Switching is a scene-level manager (`KeeperSwitch`) that flips `controlled` on keepers and retargets the follow camera. | Keeps the controller small and leaves room for the real game to place one manager; camera gained `set_target()`. |
 | 2026-11-24 | An uncontrolled keeper stops in place but keeps `_update_shadow()` running. | "Keeps doing their last job" for a street keeper is standing guard; exposure still applies, which Gate 1 needs. |
 | 2026-11-24 | The beam switches mode only when its operator or their `controlled` flag changes. | Auto sweep continues while the player watches elsewhere, without fighting direct mode changes from debug harnesses. |
+| 2026-11-24 | `run/main_scene` points at `scenes/debug/m7_promises.tscn` during M7. | Same main-scene convention as earlier modules. |
+| 2026-11-24 | Promise tracking lives in a scene-level `PromiseBoard`; the pending list lives in `GameState.promises`. | Dawn settlement and night sampling are shared rules, while the save-friendly list sits with the rest of the persistent state. |
+| 2026-11-24 | Dialogue lives in `data/dialogue/<npc_id>.json` and is applied by `DialogueBox`; promise acceptance asks the `promise_board` group and the active keeper. | Data-driven trust/bond/flags per the guide, and the box stays independent of which keeper the player controls. |
+| 2026-11-24 | Townsfolk are `Area2D`s so the keeper's existing interaction probe finds them; the Hall is found through a `hall` group. | Reuses the M1 interaction path and lets scenes place the Hall freely. |
+| 2026-11-24 | A promise can only be accepted before night; choosing it at night shows "It is too late tonight." and applies no effects. | Matches the guide's "talking to them before night gives a promise" and gives a clear refusal instead of a silent failure. |
 
 ## Known bugs
 | Date found | Bug | Status |
@@ -107,9 +121,12 @@
 | 2026-11-24 | First beam steering overshot the target by tens of degrees and oscillated (speed cap applied without braking distance). | Fixed: desired speed is also clamped to `sqrt(2 * accel * |delta angle|)`. |
 | 2026-11-24 | M5 readout and test failed to parse on `shadow.value` / `get_node_or_null` results typed as Variant. | Fixed: explicit `Node` and `float` annotations. |
 | 2026-11-24 | M6 step-3 burst cleanup freed every `daylight_fields` node, including the beam, so later steps hit a freed instance. | Fixed: the debug helper skips the beam. |
+| 2026-11-24 | Condensing the M7 harness merged two `var` declarations ("Invalid numeric notation"), so the script failed to load and the `--fast` run hung instead of quitting. | Fixed and re-verified; when a fast run hangs, check its log for `SCRIPT ERROR` (the same mode occurred in M5). |
 
 ## Playtest notes (from the human)
 _Feedback from each 🚦 gate goes here._
+
+- 2026-11-24 — 🚦 Gate 1 (M1–M6 test night): approved in conversation ("lets proceed"); no written notes and no changes requested. M7 was started on that approval.
 
 ## Ideas for later (not to be built now)
 -
@@ -128,3 +145,4 @@ _Feedback from each 🚦 gate goes here._
 | 2026-11-24 | M4 completed. Added `creature_base.gd` (group registration, daylight death via `daylight_fields`, nearest-person search, distance contact), `walker.gd` (chases nearest person), `lurker.gd` (hidden until a person enters 120 px or a lit lantern enters 140 px), a `persons` protocol (`is_takeable`/`take_shadow`) on the keeper plus `villager.tscn`, `GameState.sleepers` with `mark_sleeper`, keeper shadow lean, `creature_readout.gd`, `scenes/debug/m4_creatures.tscn` and a 22-check harness; windowed runtime adds a 40-creature FPS sample. 22/22 PASS headless and windowed. | Wait for the human's go-ahead, then M5. |
 | 2026-11-24 | M5 completed. Added `beam.gd` (lamp-room staffing, mouse/right-stick aim with speed and acceleration limits plus braking, focus mode, clamped auto sweep with end pauses, cone/range/occlusion daylight check, Dawnglass and operator drain) and `dawn_pulse.gd` (expanding annulus daylight ring with charge/shadow cost), lighthouse debug scene with a rock occluder, `beam_readout.gd` and a 31-check harness. 31/31 PASS headless; three-minute windowed runtime clean with Walkers spawned into the sweeping beam. | Wait for the human's go-ahead, then M6 (Gate 1 comes after M6). |
 | 2026-11-24 | M6 completed. Added the `controlled` flag and `body_color` to the keeper controller, `ivo.tscn`, a scene-level `KeeperSwitch` (Tab / gamepad Y, camera retarget via new `FollowCamera.set_target()`), beam mode sync to the operator's control state, `switch_readout.gd`, `scenes/debug/m6_switch.tscn` and a 22-check harness. 22/22 PASS headless; three-minute windowed runtime clean. | 🚦 Gate 1: human plays a test night and gives feedback before M7. |
+| 2026-11-24 | M7 completed after the human approved Gate 1 in conversation. Added `Events.dusk_started`/`promise_broken`, `GameState.promises`, three townsfolk (`townsfolk.gd` + `townsfolk_npc.tscn`: dusk walk to the Hall, stubborn Ferrow, dawn return), a data-driven `DialogueBox` with `data/dialogue/{odile,vell,ferrow}.json`, a scene-level `PromiseBoard` (night lit sampling by lantern/daylight within 72 px, dawn kept/broken settlement using tuned trust and a maximum-shadow reward capped at 1.0), `promise_readout.gd`, `scenes/debug/m7_promises.tscn` and a 31-check harness. 31/31 PASS headless; three-minute windowed runtime clean; M1–M6 regressions pass. | M8: Hollow houses. |

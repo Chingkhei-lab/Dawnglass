@@ -79,6 +79,8 @@ func _enter_next_phase() -> void:
 		PHASE_DAY:
 			day += 1
 			Events.day_started.emit()
+		PHASE_DUSK:
+			Events.dusk_started.emit()
 		PHASE_NIGHT:
 			Events.night_started.emit()
 		PHASE_DAWN:

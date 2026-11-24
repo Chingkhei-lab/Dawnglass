@@ -1,0 +1,17 @@
+{
+  "speaker": "Old Ferrow",
+  "text": "I will not set foot in that Hall. This house is all I have left of her. Promise me you will keep it lit.",
+  "choices": [
+    {
+      "text": "I promise.",
+      "promise": true,
+      "trust": 2,
+      "bond": 1,
+      "flag": "ferrow_promise"
+    },
+    {
+      "text": "I cannot promise that.",
+      "trust": -1
+    }
+  ]
+}

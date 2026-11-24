@@ -1,0 +1,16 @@
+{
+  "speaker": "Odile",
+  "text": "The Hall will be crowded tonight. But my own oven, my own door... if they go dark, the creatures come. Will you keep my home lit?",
+  "choices": [
+    {
+      "text": "I promise.",
+      "promise": true,
+      "trust": 1,
+      "bond": 1
+    },
+    {
+      "text": "Not tonight.",
+      "trust": -1
+    }
+  ]
+}

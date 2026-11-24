@@ -9,6 +9,7 @@ const PAD_BUTTON := JOY_BUTTON_Y
 var _index := 0
 
 func _ready() -> void:
+	add_to_group("keeper_switcher")
 	_bind_switch()
 	var keepers := _keepers()
 	for index in range(keepers.size()):
