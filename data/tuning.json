@@ -10,6 +10,19 @@
   "camera": {
     "follow_speed": 8.0
   },
+  "clock": {
+    "day_length": 720.0,
+    "dusk_length": 45.0,
+    "night_length": 300.0,
+    "dawn_length": 45.0,
+    "test_time_scale": 20.0,
+    "colors": {
+      "day": "f4f7fa",
+      "dusk": "ffb84d",
+      "night": "26354d",
+      "dawn": "e67e22"
+    }
+  },
   "lighting": {
     "lantern_radius": 96.0,
     "glint_charges": 3
