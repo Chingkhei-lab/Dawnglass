@@ -24,6 +24,7 @@ var _initial_states := {}
 var _toast_left := 0.0
 
 @onready var toast_label: Label = $UI/Controls/Toast
+@onready var nightfall_button: Button = $UI/Controls/NightfallButton
 
 func _ready() -> void:
 	add_to_group("slice")
@@ -38,6 +39,7 @@ func _ready() -> void:
 	_remember_initial_states()
 	_maren.interacted.connect(_on_keeper_interacted)
 	_ivo.interacted.connect(_on_keeper_interacted)
+	nightfall_button.pressed.connect(_skip_to_night)
 	Events.night_started.connect(_on_night_started)
 	Events.dawn.connect(_on_dawn)
 	var args := OS.get_cmdline_args() + OS.get_cmdline_user_args()
@@ -53,6 +55,9 @@ func _load_on_start() -> void:
 	get_tree().paused = false
 
 func _physics_process(delta: float) -> void:
+	nightfall_button.visible = Clock.phase == Clock.PHASE_DAY
+	var dialogue := get_tree().get_first_node_in_group("dialogue_boxes")
+	nightfall_button.disabled = dialogue != null and dialogue.is_open()
 	if _toast_left > 0.0:
 		_toast_left -= delta
 		toast_label.visible = _toast_left > 0.0
@@ -195,6 +200,20 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	elif key.physical_keycode == KEY_F9:
 		_load()
 		get_viewport().set_input_as_handled()
+	elif key.physical_keycode == KEY_N:
+		_skip_to_night()
+		get_viewport().set_input_as_handled()
+
+func _skip_to_night() -> void:
+	if Clock.phase != Clock.PHASE_DAY or _summary.visible:
+		return
+	var dialogue := get_tree().get_first_node_in_group("dialogue_boxes")
+	if dialogue != null and dialogue.is_open():
+		return
+	var dusk_left := float(Data.require_value("slice.nightfall_dusk_seconds"))
+	if Clock.skip_day(dusk_left):
+		nightfall_button.visible = false
+		_toast("NIGHTFALL")
 
 func _save() -> void:
 	if SaveSystem.save_game():

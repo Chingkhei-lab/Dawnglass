@@ -239,8 +239,20 @@ offset_right = 608.0
 offset_bottom = 17.0
 theme_override_colors/font_color = Color(0.718, 0.812, 0.871, 1)
 theme_override_font_sizes/font_size = 8
-text = "WASD MOVE  TAB SWITCH  E TALK  F LANTERN  Q GLINT  MOUSE AIM  SHIFT FOCUS  F5 SAVE  F9 LOAD"
+text = "WASD MOVE  TAB SWITCH  E TALK  F LANTERN  Q GLINT  MOUSE AIM  SHIFT FOCUS  N NIGHT  F5 SAVE  F9 LOAD"
 mouse_filter = 2
+
+[node name="NightfallButton" type="Button" parent="UI/Controls"]
+offset_left = 518.0
+offset_top = 12.0
+offset_right = 628.0
+offset_bottom = 34.0
+tooltip_text = "Skip the rest of the day and begin nightfall."
+theme_override_colors/font_color = Color(1, 0.722, 0.302, 1)
+theme_override_colors/font_hover_color = Color(1, 0.9, 0.6, 1)
+theme_override_colors/font_pressed_color = Color(0.957, 0.969, 0.98, 1)
+theme_override_font_sizes/font_size = 8
+text = "SKIP TO NIGHT"
 
 [node name="Toast" type="Label" parent="UI/Controls"]
 visible = false

@@ -83,6 +83,7 @@
     "walkers_per_wave": 2,
     "lurkers_per_wave": 1,
     "max_creatures": 12,
+    "nightfall_dusk_seconds": 3.0,
     "toast_seconds": 2.0
   },
   "shadow": {

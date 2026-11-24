@@ -40,6 +40,17 @@ func _physics_process(delta: float) -> void:
 		var rate := 1.0 / maxf(phase_length(), 0.001)
 		dawnglass_charge = minf(1.0, dawnglass_charge + step * rate)
 
+func skip_day(dusk_seconds_left: float) -> bool:
+	if phase != PHASE_DAY:
+		return false
+	var dusk_left := clampf(dusk_seconds_left, 0.0, length_of(PHASE_DUSK))
+	game_seconds += maxf(0.0, length_of(PHASE_DAY) - phase_elapsed) + length_of(PHASE_DUSK) - dusk_left
+	dawnglass_charge = 1.0
+	phase = PHASE_DUSK
+	phase_elapsed = length_of(PHASE_DUSK) - dusk_left
+	Events.dusk_started.emit()
+	return true
+
 func phase_length() -> float:
 	return length_of(phase)
 

@@ -5,9 +5,9 @@
 
 ## Current status
 - **Current module:** M10: The first playable slice ✅ complete and tested in a real run
-- **Next step:** 🚦 Gate 2: human plays the complete slice and gives feedback
+- **Next step:** 🚦 Gate 2: human retests the Nightfall shortcut and decides what comes next
 - **Godot version installed:** 4.7.2.stable.official.ed1daf0bf (via Godot MCP `get_godot_version`; renderer Forward+, D3D12, AMD Radeon Graphics)
-- **Waiting on the human for:** Gate 2 playtest feedback; nothing after M10 will be built until then
+- **Waiting on the human for:** Gate 2 retest after the Nightfall revision; nothing after M10 will be built until then
 
 ---
 
@@ -26,19 +26,19 @@
 | M7: Townsfolk, the Hall and promises | ✅ | Three townsfolk (Odile, Sister Vell, Old Ferrow) with a dusk routine: Odile and Vell walk to the Hall while stubborn Ferrow stays home; talking before night opens a data-driven dialogue box whose promise is tracked through the night (lantern or beam on the home) and settled at dawn as kept or broken, changing trust and, when kept, raising the promising keeper's maximum shadow. 31 checks pass; three-minute windowed run clean. |
 | M8: Hollow houses | ✅ | Reusable `HouseComponent`: a home whose family is away and which sees no light during the night becomes a dark, creature-filled hollow at dawn; a lantern plus a Glint clears it by day, restores the house and calls the family back from the Hall. House state lives in `GameState.houses`. 21 checks pass; three-minute windowed run clean. |
 | M9: Dawn summary, HUD and saving | ✅ | Deferred dawn report covers safe people, Sleepers, kept/broken promises and daylight-destroyed creatures; every recorded Sleeper gets a chapel bed and present bodies move there. Minimal HUD shows the active keeper's shadow stage/bar, Glint pips, stored Dawnglass and day/phase. One-slot deterministic JSON save/load restores GameState, Clock, RNG, actors, house night flags and night statistics; save → load → save and quit → restart → load → save are byte-identical. 26 checks pass plus 9 restart/load checks; three-minute windowed run clean. |
-| M10: The first playable slice | ✅ | One connected 1280×720 Hollin Cove area with lighthouse, two docks, Hall, chapel, street and three homes; Maren and Ivo; full day/night loop; Walker/Lurker waves; Burn beam, lantern and Glint; shadow loss/recovery/stages; dusk routines and Ferrow's promise; taken townsfolk in chapel beds; hollow-house clearing; dawn report; F5/F9 save/load. 34 headless checks plus 4 restart/load checks pass. |
-| 🚦 Gate 2: The slice | ⬜ | Needs the human to play; no later module is authorized yet. |
+| M10: The first playable slice | ✅ | One connected 1280×720 Hollin Cove area with lighthouse, two docks, Hall, chapel, street and three homes; Maren and Ivo; full day/night loop; Walker/Lurker waves; Burn beam, lantern and Glint; shadow loss/recovery/stages; dusk routines and Ferrow's promise; taken townsfolk in chapel beds; hollow-house clearing; dawn report; F5/F9 save/load; clickable Nightfall button plus N shortcut. 35 headless checks plus 4 restart/load checks pass. |
+| 🚦 Gate 2: The slice | Feedback received | The opening day felt taskless, so a Nightfall shortcut was added; the human still needs to retest it. No later module is authorized yet. |
 
 ### Tests for the current module
 - ✅ The debug harness instances the exact real `hollin_cove.tscn`; two keepers, three townsfolk, three homes, Hall, chapel, HUD, dialogue, promise board, night statistics and dawn summary are present, and the project main scene is the slice. The actual main scene also boots headlessly for 300 frames with no errors or warnings.
-- ✅ Day one starts with Odile's husband already absent/asleep, Maren staffing the lamp room, Ivo on the street, a charging crystal and no creatures; the staffed Burn beam stays off during the day.
-- ✅ Ferrow's real dialogue creates a promise; at dusk Odile and Vell walk to the Hall while Ferrow stays home; after switching to Ivo, Maren runs the automatic beam at night.
+- ✅ Day one starts with Odile's husband already absent/asleep, Maren staffing the lamp room, Ivo on the street, a charging crystal, no creatures and a visible enabled Nightfall button; the staffed Burn beam stays off during the day.
+- ✅ Ferrow's real dialogue creates a promise; the Nightfall button skips the remaining day, fully charges Dawnglass, preserves a three-second dusk for Odile and Vell to leave home while Ferrow stays, then emits the normal night event and spawns the first wave; the button hides after use and Maren runs the automatic beam.
 - ✅ Townsfolk use the same takeable-person protocol as keepers; a Walker takes Odile, Ivo's Glint destroys another Walker, and Ivo's lantern keeps Ferrow's promise lit.
 - ✅ The deferred dawn report lists the taken townsperson, kept promise and destroyed creature; Odile moves to a chapel bed alongside the absent Sleeper, and only the empty unlit home becomes hollow.
 - ✅ E / gamepad A dismisses the summary; the next morning a lantern plus Glint clears the hollow without waking its Sleeper.
 - ✅ Saving captures the slice spawner, a live Walker, a rushing Lurker and Glints as transient actors; the Lurker's state/target and same-process save → load → save are restored exactly, and a separate-process `--m10-load` restart restores the exact live-night snapshot before settling its promise and filling beds at dawn (4/4 checks).
 - ✅ Accelerated real-time play reaches a complete dawn report and the next day's charging phase.
-- ✅ Three-minute fixed-rate windowed run (10,800 physics-frame target at 60 Hz, with an independent three-minute render-loop deadline): 34/34 PASS, `M10 RUNTIME CHECK COMPLETE`, no `ERROR`/`WARNING` lines. M1 (16/16), M2 (13/13), M3 (26/26), M4 (22/22), M5 (31/31), M6 (22/22), M7 (31/31), M8 (21/21) and M9 (26/26 plus restart/load) re-run with no regressions.
+- ✅ Three-minute fixed-rate windowed run (10,800 physics-frame target at 60 Hz, with an independent three-minute render-loop deadline): 35/35 PASS, `M10 RUNTIME CHECK COMPLETE`, no `ERROR`/`WARNING` lines. M1 (16/16), M2 (13/13), M3 (26/26), M4 (22/22), M5 (31/31), M6 (22/22), M7 (31/31), M8 (21/21) and M9 (26/26 plus restart/load) re-run with no regressions.
 - ✅ Every GDScript file is under 300 lines; `git diff --check` passes. Visual feel, map readability and whether a new player understands the slice still require the human Gate 2 playtest.
 
 ---
@@ -91,6 +91,7 @@
 | 2026-11-24 | GAME_BIBLE §7.4 | No event identified a creature destroyed by daylight, so dawn totals could not be observed. | Added `Events.creature_destroyed`, emitted immediately before a daylight-killed creature is freed. | Resolved for M9 |
 | 2026-11-24 | GAME_BIBLE §13 | Exact slice layout, scale and encounter pacing are not specified. | Hollin Cove is a connected 1280×720 placeholder map; deterministic seed 4107 starts with 2 Walkers and 1 Lurker, then adds the same wave every 24 game seconds up to 12 creatures. | Open for Gate 2 tuning |
 | 2026-11-24 | GAME_BIBLE §13 | The new-player success test has no prescribed onboarding presentation. | The notice board explains Ferrow's request and the HUD lists controls; there is no tutorial screen or quest tracker. Whether this is clear enough requires human play. | Open for Gate 2 |
+| 2026-11-25 | Gate 2 feedback | No control was specified for skipping the long opening day to reach the first encounter. | Added a visible clickable Nightfall button and N shortcut; it charges Dawnglass and enters dusk with a tuned three seconds remaining before the normal night event. | Open for Gate 2 retest |
 
 ## Decisions made
 | Date | Decision | Why |
@@ -140,6 +141,7 @@
 | 2026-11-24 | Canonical saves snap floats to 1e-9 before JSON serialization. | Godot's decimal JSON parse can move a float by one ULP; stable precision makes save → load → save byte-identical without visible state loss. |
 | 2026-11-24 | `--m10-load` pauses the tree, defers loading until scene setup ends, then unpauses before the first simulation tick. | Transient actors cannot be added to a busy parent, and startup must not advance the restored snapshot. |
 | 2026-11-24 | Keeper movement/actions and keeper switching pause while dialogue or the dawn summary is open. | Modal UI must not also move or fire the controlled keeper. |
+| 2026-11-25 | Nightfall enters a three-second dusk instead of emitting dusk and night in the same frame. | Odile and Vell need time to leave home before houses snapshot their night occupancy, and the normal night event must spawn the first wave. |
 
 ## Known bugs
 | Date found | Bug | Status |
@@ -168,7 +170,7 @@
 _Feedback from each 🚦 gate goes here._
 
 - 2026-11-24 — 🚦 Gate 1 (M1–M6 test night): approved in conversation ("lets proceed"); no written notes and no changes requested. M7 was started on that approval.
-- 2026-11-24 — 🚦 Gate 2 (M10 slice): awaiting the human's playtest; no feedback recorded yet.
+- 2026-11-25 — 🚦 Gate 2 (M10 slice): the human reported that the opening day had no immediate task, so they walked around without doing anything and requested a button to skip to night when creatures appear, anticipating the same problem for new players. Added the clickable Nightfall button and N shortcut; awaiting a retest before any later module.
 
 ## Ideas for later (not to be built now)
 -
@@ -191,3 +193,4 @@ _Feedback from each 🚦 gate goes here._
 | 2026-11-24 | M8 completed. Added reusable `HouseComponent` + `scenes/world/house.tscn`, `GameState.houses`, `house_hollowed` / `house_cleared` events, a `glint_bursts` group, and townsfolk reactions that keep families in the Hall until their home is cleared. Empty unlit houses hollow at dawn; a daytime lantern + Glint restores the house and calls the family home. Added `house_readout.gd`, `scenes/debug/m8_houses.tscn` and a 21-check harness. 21/21 PASS headless; M1–M7 regressions pass. | M9: Dawn summary, HUD and saving. |
 | 2026-11-24 | M9 completed. Added `NightStats`, a deferred `DawnSummary`, reusable `KeeperHud`, `ChapelBeds`, `Events.creature_destroyed` / `state_loaded`, actor save-state hooks, public keeper selection, and deterministic one-slot `SaveSystem` persistence. The debug harness covers HUD updates, night accounting, promise settlement ordering, chapel placement, same-process save/load and a separate process restart/load. Final results: 26/26 headless checks, 9/9 restart/load checks, byte-identical re-saves, clean three-minute windowed runtime, and M1–M8 regressions all passing. | M10: assemble and play the first slice. |
 | 2026-11-24 | M10 completed. Assembled Hollin Cove as the main scene with lighthouse, docks, Hall, chapel, street and three homes; integrated both keepers, townsfolk routines and promises, Walker/Lurker waves, Burn beam, lantern/Glint, shadow stages, Sleepers, hollow clearing, dawn reporting and F5/F9 persistence. Added runtime collision construction, transient creature/Glint saves, stable float serialization and paused deferred startup loading. Final results: 34/34 headless checks, 4/4 restart/load checks, actual-main-scene 300-frame boot, clean three-minute windowed runtime with no errors/warnings, and M1–M9 regressions passing. | 🚦 Gate 2: stop and ask the human to play the slice; record feedback before any later work. |
+| 2026-11-25 | Gate 2 Nightfall revision. Added a clickable Skip to Night button and N shortcut, a tuned three-second dusk transition in `Clock.skip_day()`, full Dawnglass charging, modal-input guards and button visibility sync. The M10 harness now presses the real button signal and verifies dusk routines, the automatic beam and first-wave spawning; 35/35 headless checks, 4/4 restart/load checks, M1–M9 regressions and the exact-version three-minute windowed run all pass with no errors or warnings. | 🚦 Gate 2: ask the human to retest Nightfall; no later module is authorized yet. |

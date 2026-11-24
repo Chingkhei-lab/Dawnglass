@@ -5,7 +5,6 @@ const RUNTIME_MSEC := 180000
 const STEP_TIMEOUT := 5000
 const WALKER_SCENE := preload("res://scenes/creatures/walker.tscn")
 const LURKER_SCENE := preload("res://scenes/creatures/lurker.tscn")
-
 var failures := 0
 var testing := true
 var load_mode := false
@@ -18,7 +17,6 @@ var saved_text := ""
 var saved_payload: Dictionary = {}
 var dawn_seen := false
 var dawn_phase_frames := 0
-
 var slice: Node
 var maren: Node
 var ivo: Node
@@ -34,7 +32,7 @@ var ferrow: Node
 var odile: Node
 var vell: Node
 var walker: Node
-
+var nightfall_button: Button
 func _ready() -> void:
 	Clock.time_scale = 0.0
 	slice = $Slice
@@ -51,6 +49,7 @@ func _ready() -> void:
 	ferrow = slice.get_node("Ferrow")
 	odile = slice.get_node("Odile")
 	vell = slice.get_node("Vell")
+	nightfall_button = slice.get_node("UI/Controls/NightfallButton")
 	slice.spawning_enabled = false
 	load_mode = (OS.get_cmdline_args() + OS.get_cmdline_user_args()).has("--m10-load")
 	if load_mode:
@@ -60,7 +59,6 @@ func _ready() -> void:
 		DirAccess.remove_absolute(ProjectSettings.globalize_path(SaveSystem.SAVE_PATH))
 		slice.reset_slice()
 		print("M10 TEST START")
-
 func _process(_delta: float) -> void:
 	if testing:
 		return
@@ -101,7 +99,7 @@ func _structure_step() -> void:
 	_expect(str(ProjectSettings.get_setting("application/run/main_scene")) == "res://scenes/world/hollin_cove.tscn", "PASS M10 main scene is the playable slice", "FAIL M10 main scene")
 	_expect(get_tree().get_nodes_in_group("keepers").size() == 2 and get_tree().get_nodes_in_group("townsfolk").size() == 3, "PASS M10 two keepers and three townsfolk share the area", "FAIL M10 population")
 	_expect(get_tree().get_nodes_in_group("houses").size() == 3 and get_tree().get_nodes_in_group("hall").size() == 1 and get_tree().get_nodes_in_group("chapel_beds").size() == 1, "PASS M10 three homes, Hall and chapel are present", "FAIL M10 buildings")
-	_expect(Clock.day == 1 and Clock.phase == Clock.PHASE_DAY and GameState.sleepers == ["absent"], "PASS M10 day one starts with Odile's husband already asleep", "FAIL M10 initial state")
+	_expect(Clock.day == 1 and Clock.phase == Clock.PHASE_DAY and GameState.sleepers == ["absent"] and nightfall_button.visible and not nightfall_button.disabled, "PASS M10 day one starts with Nightfall available", "FAIL M10 initial state")
 	_expect(maren.controlled and not ivo.controlled and beam.operator == maren, "PASS M10 Maren starts in the lamp room and Ivo on the street", "FAIL M10 keeper roles")
 	_expect(not beam.is_beam_on() and get_tree().get_nodes_in_group("creatures").is_empty(), "PASS M10 the day starts dark and creature-free", "FAIL M10 daytime spawn/beam")
 	_expect(get_tree().get_nodes_in_group("night_stats").size() == 1 and get_tree().get_nodes_in_group("dawn_summary").size() == 1 and get_tree().get_nodes_in_group("dialogue_boxes").size() == 1, "PASS M10 reporting and dialogue are wired into the slice", "FAIL M10 UI systems")
@@ -123,17 +121,19 @@ func _day_step() -> void:
 
 func _night_step() -> void:
 	if step_frame == 1:
-		Clock.phase = Clock.PHASE_DUSK
-		Events.dusk_started.emit()
+		Clock.time_scale = 1.0
+		slice.spawning_enabled = true
+		nightfall_button.pressed.emit()
 	elif step_frame == 300:
-		Clock.phase = Clock.PHASE_NIGHT
-		Clock.dawnglass_charge = 1.0
-		Events.night_started.emit()
+		_expect(Clock.phase == Clock.PHASE_NIGHT and Clock.dawnglass_charge > 0.9 and not nightfall_button.visible and slice.wave == 1 and not get_tree().get_nodes_in_group("creatures").is_empty(), "PASS M10 Nightfall skips day, charges the beam and spawns the first wave", "FAIL M10 Nightfall button")
+		slice.spawning_enabled = false
+		slice.clear_transients()
 	elif step_frame == 360:
 		_expect(odile.global_position.distance_to(odile.home) > 96.0 and vell.global_position.distance_to(vell.home) > 96.0, "PASS M10 Odile and Vell leave their homes for the Hall", "FAIL M10 dusk routine")
 		_expect(ferrow.global_position.distance_to(ferrow.home) < 1.0, "PASS M10 Old Ferrow refuses to leave home", "FAIL M10 Ferrow routine")
 		_expect(beam.operator == maren and not beam.manual_control and beam.is_beam_on(), "PASS M10 the abandoned lamp room runs an automatic beam", "FAIL M10 auto beam")
 		_expect(odile.is_in_group("persons") and odile.is_takeable() and vell.is_takeable(), "PASS M10 townsfolk are valid creature targets", "FAIL M10 townsperson protocol")
+		Clock.time_scale = 0.0
 		_advance(3)
 
 func _dawn_step() -> void:
