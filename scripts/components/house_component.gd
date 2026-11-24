@@ -11,6 +11,7 @@ var _was_lit := false
 
 func _ready() -> void:
 	add_to_group("houses")
+	_build_collision()
 	if not GameState.houses.has(npc_id):
 		GameState.houses[npc_id] = "home"
 	Events.night_started.connect(_on_night_started)
@@ -19,7 +20,7 @@ func _ready() -> void:
 
 func capture_state() -> Dictionary:
 	return {
-		"id": npc_id,
+		"id": "house:" + npc_id,
 		"empty_tonight": _empty_tonight,
 		"was_lit": _was_lit,
 	}
@@ -98,6 +99,24 @@ func _family_is_away() -> bool:
 
 func _nest_center() -> Vector2:
 	return global_position + Vector2(0, 28)
+
+func _build_collision() -> void:
+	_add_wall("BackWall", Vector2(0, 2), Vector2(56, 8))
+	_add_wall("LeftWall", Vector2(-18, 17), Vector2(20, 34))
+	_add_wall("RightWall", Vector2(18, 17), Vector2(20, 34))
+
+func _add_wall(wall_name: String, at: Vector2, size: Vector2) -> void:
+	var wall := StaticBody2D.new()
+	wall.name = wall_name
+	wall.position = at
+	wall.collision_layer = 1
+	wall.collision_mask = 0
+	var shape := CollisionShape2D.new()
+	var rectangle := RectangleShape2D.new()
+	rectangle.size = size
+	shape.shape = rectangle
+	wall.add_child(shape)
+	add_child(wall)
 
 func _draw() -> void:
 	var hollow := is_hollow()

@@ -1,0 +1,24 @@
+[gd_scene load_steps=2 format=3]
+
+[node name="Hall" type="Node2D" groups=["hall"]]
+
+[node name="Walls" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-62, -88, 62, -88, 62, 0, -62, 0)
+color = Color(0.42, 0.47, 0.53, 1)
+
+[node name="Roof" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-74, -88, 74, -88, 0, -126)
+color = Color(0.263, 0.302, 0.361, 1)
+
+[node name="Door" type="Polygon2D" parent="."]
+polygon = PackedVector2Array(-12, -38, 12, -38, 12, 0, -12, 0)
+color = Color(1, 0.721, 0.302, 1)
+
+[node name="Sign" type="Label" parent="."]
+offset_left = -30.0
+offset_top = -156.0
+offset_right = 30.0
+offset_bottom = -136.0
+theme_override_colors/font_color = Color(0.957, 0.969, 0.98, 1)
+theme_override_font_sizes/font_size = 10
+text = "THE HALL"

@@ -18,6 +18,8 @@ func _ready() -> void:
 		_focus(keepers[_index])
 
 func _physics_process(_delta: float) -> void:
+	if _input_blocked():
+		return
 	if Input.is_action_just_pressed("switch_keeper"):
 		switch_next()
 
@@ -59,6 +61,13 @@ func _keepers() -> Array:
 		if keeper != null:
 			result.append(keeper)
 	return result
+
+func _input_blocked() -> bool:
+	var dialogue := get_tree().get_first_node_in_group("dialogue_boxes")
+	if dialogue != null and dialogue.is_open():
+		return true
+	var summary := get_tree().get_first_node_in_group("dawn_summary")
+	return summary != null and summary.visible
 
 func _bind_switch() -> void:
 	if not InputMap.has_action("switch_keeper"):

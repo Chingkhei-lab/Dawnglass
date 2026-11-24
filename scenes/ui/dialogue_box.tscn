@@ -1,0 +1,43 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/ui/dialogue_box.gd" id="1_dialogue"]
+
+[node name="DialogueBox" type="CanvasLayer"]
+layer = 3
+script = ExtResource("1_dialogue")
+
+[node name="Panel" type="ColorRect" parent="."]
+offset_left = 24.0
+offset_top = 196.0
+offset_right = 616.0
+offset_bottom = 348.0
+color = Color(0.078, 0.106, 0.161, 0.95)
+mouse_filter = 2
+
+[node name="Speaker" type="Label" parent="Panel"]
+offset_left = 12.0
+offset_top = 8.0
+offset_right = 580.0
+offset_bottom = 30.0
+theme_override_colors/font_color = Color(1, 0.721, 0.302, 1)
+theme_override_font_sizes/font_size = 14
+mouse_filter = 2
+
+[node name="Body" type="Label" parent="Panel"]
+offset_left = 12.0
+offset_top = 34.0
+offset_right = 580.0
+offset_bottom = 100.0
+theme_override_colors/font_color = Color(0.957, 0.969, 0.98, 1)
+theme_override_font_sizes/font_size = 11
+autowrap_mode = 3
+mouse_filter = 2
+
+[node name="Choices" type="Label" parent="Panel"]
+offset_left = 12.0
+offset_top = 106.0
+offset_right = 580.0
+offset_bottom = 148.0
+theme_override_colors/font_color = Color(0.718, 0.812, 0.871, 1)
+theme_override_font_sizes/font_size = 11
+mouse_filter = 2

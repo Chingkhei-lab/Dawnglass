@@ -42,6 +42,9 @@ func finalize() -> Dictionary:
 		"creatures_destroyed": creatures_destroyed,
 	}
 
+func reset() -> void:
+	_reset()
+
 func capture_state() -> Dictionary:
 	return {
 		"promises_kept": promises_kept,

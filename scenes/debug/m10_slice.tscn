@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://scripts/debug/m10_test.gd" id="1_test"]
+[ext_resource type="PackedScene" path="res://scenes/world/hollin_cove.tscn" id="2_slice"]
+
+[node name="M10SliceDebug" type="Node2D"]
+script = ExtResource("1_test")
+
+[node name="Slice" parent="." instance=ExtResource("2_slice")]

@@ -35,6 +35,32 @@ func _physics_process(delta: float) -> void:
 	if light != null:
 		light.energy = MAX_ENERGY * clampf(time_left / maxf(duration, 0.001), 0.0, 1.0)
 
+func capture_state() -> Dictionary:
+	return {
+		"id": name,
+		"scene": scene_file_path,
+		"transient": true,
+		"position": [global_position.x, global_position.y],
+		"radius": radius,
+		"duration": duration,
+		"obstacle_mask": obstacle_mask,
+		"time_left": time_left,
+	}
+
+func restore_state(state: Dictionary) -> void:
+	global_position = _read_vector(state.get("position", []), global_position)
+	configure(
+		float(state.get("radius", radius)),
+		float(state.get("duration", duration)),
+		int(state.get("obstacle_mask", obstacle_mask))
+	)
+	time_left = float(state.get("time_left", time_left))
+
+func _read_vector(value: Variant, fallback: Vector2) -> Vector2:
+	if value is Array and value.size() >= 2:
+		return Vector2(float(value[0]), float(value[1]))
+	return fallback
+
 func is_point_lit(point: Vector2) -> bool:
 	return DaylightCheck.is_lit(
 		get_world_2d().direct_space_state,

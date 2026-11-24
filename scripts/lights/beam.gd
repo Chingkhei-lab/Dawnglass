@@ -42,7 +42,9 @@ func _physics_process(delta: float) -> void:
 	queue_redraw()
 
 func is_beam_on() -> bool:
-	return operator != null and Clock.dawnglass_charge > 0.0
+	if operator == null or Clock.dawnglass_charge <= 0.0:
+		return false
+	return Clock.phase == Clock.PHASE_DUSK or Clock.phase == Clock.PHASE_NIGHT
 
 func set_target_angle(target: float) -> void:
 	_target_angle = wrapf(target, -PI, PI)

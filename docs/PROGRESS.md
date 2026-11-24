@@ -4,10 +4,10 @@
 > Status: ✅ done (tested in a real run) · 🟡 in progress · ⬜ not started · ⛔ blocked
 
 ## Current status
-- **Current module:** M9: Dawn summary, HUD and saving ✅ complete and tested in a real run
-- **Next step:** M10: The first playable slice
+- **Current module:** M10: The first playable slice ✅ complete and tested in a real run
+- **Next step:** 🚦 Gate 2: human plays the complete slice and gives feedback
 - **Godot version installed:** 4.7.2.stable.official.ed1daf0bf (via Godot MCP `get_godot_version`; renderer Forward+, D3D12, AMD Radeon Graphics)
-- **Waiting on the human for:** nothing
+- **Waiting on the human for:** Gate 2 playtest feedback; nothing after M10 will be built until then
 
 ---
 
@@ -26,19 +26,20 @@
 | M7: Townsfolk, the Hall and promises | ✅ | Three townsfolk (Odile, Sister Vell, Old Ferrow) with a dusk routine: Odile and Vell walk to the Hall while stubborn Ferrow stays home; talking before night opens a data-driven dialogue box whose promise is tracked through the night (lantern or beam on the home) and settled at dawn as kept or broken, changing trust and, when kept, raising the promising keeper's maximum shadow. 31 checks pass; three-minute windowed run clean. |
 | M8: Hollow houses | ✅ | Reusable `HouseComponent`: a home whose family is away and which sees no light during the night becomes a dark, creature-filled hollow at dawn; a lantern plus a Glint clears it by day, restores the house and calls the family back from the Hall. House state lives in `GameState.houses`. 21 checks pass; three-minute windowed run clean. |
 | M9: Dawn summary, HUD and saving | ✅ | Deferred dawn report covers safe people, Sleepers, kept/broken promises and daylight-destroyed creatures; every recorded Sleeper gets a chapel bed and present bodies move there. Minimal HUD shows the active keeper's shadow stage/bar, Glint pips, stored Dawnglass and day/phase. One-slot deterministic JSON save/load restores GameState, Clock, RNG, actors, house night flags and night statistics; save → load → save and quit → restart → load → save are byte-identical. 26 checks pass plus 9 restart/load checks; three-minute windowed run clean. |
-| M10: The first playable slice | ⬜ | |
-| 🚦 Gate 2: The slice | ⬜ | Needs the human to play |
+| M10: The first playable slice | ✅ | One connected 1280×720 Hollin Cove area with lighthouse, two docks, Hall, chapel, street and three homes; Maren and Ivo; full day/night loop; Walker/Lurker waves; Burn beam, lantern and Glint; shadow loss/recovery/stages; dusk routines and Ferrow's promise; taken townsfolk in chapel beds; hollow-house clearing; dawn report; F5/F9 save/load. 34 headless checks plus 4 restart/load checks pass. |
+| 🚦 Gate 2: The slice | ⬜ | Needs the human to play; no later module is authorized yet. |
 
 ### Tests for the current module
-- ✅ Structure: two keepers, night statistics, dawn summary, chapel beds and HUD are registered; creature-destruction and state-loaded signals exist; the save slot starts absent.
-- ✅ HUD shows Maren's normal shadow, then her flickering stage and value/maximum bar, two Glint pips, stored Dawnglass and day/phase; switching to Ivo updates the active keeper.
-- ✅ A Walker entering a Glint emits exactly one destruction event and is counted for the dawn report.
-- ✅ After a villager is taken, a promise is kept and another broken, and a creature is destroyed, the deferred dawn summary lists all safe people, both Sleepers, 1 kept / 1 broken promise and 1 destroyed creature.
-- ✅ Every Sleeper receives a chapel bed; the present villager body moves to its bed and an absent Sleeper retains a drawn bed marker.
-- ✅ Saving captures actors, pending promises, GameState, Clock, RNG and night statistics; loading restores trust/day/phase, the active keeper, Glints, shadow and promise-home vectors.
-- ✅ Save → load → save is byte-identical.
-- ✅ A separate Godot process quits, restarts with `--m9-load`, loads the same file, continues the same RNG sequence, settles the loaded promise at the next dawn, restores Sleepers to beds, and produces a byte-identical re-save (9/9 checks).
-- ✅ Three-minute windowed run: 26/26 PASS, `M9 RUNTIME CHECK COMPLETE`, no `ERROR`/`WARNING` lines. M1 (16/16), M2 (13/13), M3 (26/26), M4 (22/22), M5 (31/31), M6 (22/22), M7 (31/31) and M8 (21/21) re-run with no regressions.
+- ✅ The debug harness instances the exact real `hollin_cove.tscn`; two keepers, three townsfolk, three homes, Hall, chapel, HUD, dialogue, promise board, night statistics and dawn summary are present, and the project main scene is the slice. The actual main scene also boots headlessly for 300 frames with no errors or warnings.
+- ✅ Day one starts with Odile's husband already absent/asleep, Maren staffing the lamp room, Ivo on the street, a charging crystal and no creatures; the staffed Burn beam stays off during the day.
+- ✅ Ferrow's real dialogue creates a promise; at dusk Odile and Vell walk to the Hall while Ferrow stays home; after switching to Ivo, Maren runs the automatic beam at night.
+- ✅ Townsfolk use the same takeable-person protocol as keepers; a Walker takes Odile, Ivo's Glint destroys another Walker, and Ivo's lantern keeps Ferrow's promise lit.
+- ✅ The deferred dawn report lists the taken townsperson, kept promise and destroyed creature; Odile moves to a chapel bed alongside the absent Sleeper, and only the empty unlit home becomes hollow.
+- ✅ E / gamepad A dismisses the summary; the next morning a lantern plus Glint clears the hollow without waking its Sleeper.
+- ✅ Saving captures the slice spawner, a live Walker, a rushing Lurker and Glints as transient actors; the Lurker's state/target and same-process save → load → save are restored exactly, and a separate-process `--m10-load` restart restores the exact live-night snapshot before settling its promise and filling beds at dawn (4/4 checks).
+- ✅ Accelerated real-time play reaches a complete dawn report and the next day's charging phase.
+- ✅ Three-minute fixed-rate windowed run (10,800 physics-frame target at 60 Hz, with an independent three-minute render-loop deadline): 34/34 PASS, `M10 RUNTIME CHECK COMPLETE`, no `ERROR`/`WARNING` lines. M1 (16/16), M2 (13/13), M3 (26/26), M4 (22/22), M5 (31/31), M6 (22/22), M7 (31/31), M8 (21/21) and M9 (26/26 plus restart/load) re-run with no regressions.
+- ✅ Every GDScript file is under 300 lines; `git diff --check` passes. Visual feel, map readability and whether a new player understands the slice still require the human Gate 2 playtest.
 
 ---
 
@@ -75,19 +76,21 @@
 | 2026-11-24 | AGENT_BUILD_GUIDE §5 M7 | Daily routines are unspecified beyond "walk to the Hall". | Straight-line walk at 60 px/s to the `hall` group at dusk and back home at dawn; Ferrow is flagged `stubborn` and skips the dusk walk. No paths, doors or collision avoidance. | Open |
 | 2026-11-24 | AGENT_BUILD_GUIDE §5 M7 | Whether a promise home must be lit continuously, at dawn, or only once is not stated. | Accumulated lit time (10 s) at any point during the night; this rewards a brief visit, so revisit it during M10 tuning. | Open |
 | 2026-11-24 | GAME_BIBLE §7.2 | Which keeper gains the raised maximum shadow after a kept promise is not stated. | The keeper who accepted the promise gains it at dawn even if the player switched away; a missing keeper skips only the reward. | Open |
-| 2026-11-24 | GAME_BIBLE §7.4 | Whether townsfolk can be taken by creatures in this slice is not stated. | Townsfolk are interactable `Area2D`s but stay out of the `persons` group, so creatures ignore them; they join the person protocol with Hollow Houses. | Open |
-| 2026-11-24 | AGENT_BUILD_GUIDE §5 M7 | No dusk signal existed, and promise settlement needed a broken-promise counterpart. | Added `Events.dusk_started` (emitted by `Clock` on entering dusk) and `Events.promise_broken`; `promise_kept` already existed. | Open |
+| 2026-11-24 | GAME_BIBLE §7.4 | Whether townsfolk can be taken by creatures in this slice is not stated. | M10 adds townsfolk to the `persons` group and implements `is_takeable()` / `take_shadow()`, so creatures can take them and dawn moves them to chapel beds. | Resolved for M10 |
+| 2026-11-24 | AGENT_BUILD_GUIDE §5 M7 | No dusk signal existed, and promise settlement needed a broken-promise counterpart. | Added `Events.dusk_started` (emitted by `Clock` on entering dusk) and `Events.promise_broken`; `promise_kept` already existed. | Resolved for M7 |
 | 2026-11-24 | GAME_BIBLE §7.3 / AGENT_BUILD_GUIDE §5 M8 | "Dark", "empty" and "lit" are not defined for a hollow house. | Empty means the matched townsperson is more than 96 px from the house when night starts; any keeper lantern within 72 px or any daylight field covering the nest during the night prevents hollowing. | Open |
 | 2026-11-24 | GAME_BIBLE §7.3 / §8 / AGENT_BUILD_GUIDE §5 M8 | The exact lantern + Glint clearing rule is not specified. | Clearing is daytime-only and requires a lit keeper lantern within 72 px plus a Glint covering the nest centre; a Glint alone or the beam alone does not clear it. | Open |
 | 2026-11-24 | GAME_BIBLE §8 | The Hollow "grows", but no growth amount, timing or behaviour is given. | A hollow is a static drawn nest with three shadow silhouettes and a dark house palette; it does not move, attack or grow yet. | Open |
 | 2026-11-24 | GAME_BIBLE §7.3 | What the family does while its home is hollow is not stated. | They wait in the Hall and walk home on `house_cleared`; scenes without a `HouseComponent` keep the M7 dawn-return behaviour. | Open |
-| 2026-11-24 | GAME_BIBLE §7.3 | No house-state storage format exists before saving arrives. | `GameState.houses` stores `home` / `hollow` keyed by `npc_id`; M9 can serialise it with the rest of the state. | Open |
-| 2026-11-24 | GAME_BIBLE §7.3 | House walls and the light path into a hollow are not specified. | Debug houses are visual-only, so the Glint ray reaches the nest unobstructed; the real map will need a doorway/window path or an exempt wall layer. | Open |
+| 2026-11-24 | GAME_BIBLE §7.3 | No house-state storage format exists before saving arrives. | `GameState.houses` stores `home` / `hollow` keyed by `npc_id`; M9 serialises it with the rest of the state. | Resolved for M9 |
+| 2026-11-24 | GAME_BIBLE §7.3 | House walls and the light path into a hollow are not specified. | M10 houses build movement-only back/side walls at runtime, leaving the doorway open so a Glint from the front reaches the nest; daylight rays are not blocked by these walls. | Resolved for M10 |
 | 2026-11-24 | AGENT_BUILD_GUIDE §5 M9 / GAME_BIBLE §10 | The dawn summary's population, layout and dismissal control are not specified. | Safe people are the non-Sleeper `persons` plus `townsfolk`; the report appears after all dawn listeners and closes with E / gamepad A. | Open |
 | 2026-11-24 | AGENT_BUILD_GUIDE §5 M9 | Chapel bed layout and what to do when a Sleeper's actor is absent are not specified. | `ChapelBeds` uses a three-column grid, moves matching `person_id()` actors, and draws a marker for missing bodies. | Open |
 | 2026-11-24 | GAME_BIBLE §7.2 / guide §5 M9 | The minimal HUD's exact representation is not specified. | Shadow uses a stage word and proportional bar, Glint uses pips, Dawnglass uses a bar, and time uses day plus phase; no shadow percentage is shown. | Open |
-| 2026-11-24 | AGENT_BUILD_GUIDE §5 M9 | Save slot count, filename, schema and eligible runtime state are not specified. | One versioned `user://dawn_save.json` slot stores persistent state, Clock, RNG, actors, house night flags and night statistics. Transient creatures, light bursts and camera position are not serialized yet. | Open |
+| 2026-11-24 | AGENT_BUILD_GUIDE §5 M9 | Save slot count, filename, schema and eligible runtime state are not specified. | One versioned `user://dawn_save.json` slot stores persistent state, Clock, RNG, actors, house night flags, night statistics, slice spawner state, live creatures and Glints. Camera position remains derived. | Resolved for M10 |
 | 2026-11-24 | GAME_BIBLE §7.4 | No event identified a creature destroyed by daylight, so dawn totals could not be observed. | Added `Events.creature_destroyed`, emitted immediately before a daylight-killed creature is freed. | Resolved for M9 |
+| 2026-11-24 | GAME_BIBLE §13 | Exact slice layout, scale and encounter pacing are not specified. | Hollin Cove is a connected 1280×720 placeholder map; deterministic seed 4107 starts with 2 Walkers and 1 Lurker, then adds the same wave every 24 game seconds up to 12 creatures. | Open for Gate 2 tuning |
+| 2026-11-24 | GAME_BIBLE §13 | The new-player success test has no prescribed onboarding presentation. | The notice board explains Ferrow's request and the HUD lists controls; there is no tutorial screen or quest tracker. Whether this is clear enough requires human play. | Open for Gate 2 |
 
 ## Decisions made
 | Date | Decision | Why |
@@ -130,6 +133,13 @@
 | 2026-11-24 | `SaveSystem` writes canonical, sorted JSON and normalizes numeric variants before serialization; the 64-bit RNG state is stored as a string. | JSON parsing turns numbers into floats and cannot preserve large integers exactly; normalization plus a string RNG state makes repeated saves byte-identical. |
 | 2026-11-24 | Actors expose small `capture_state()` / `restore_state()` hooks, and `KeeperSwitch.select_keeper()` is public. | Saving stays scene-driven and deterministic without hard-coding every actor type or private switcher index in the autoload. |
 | 2026-11-24 | Taking a keeper's shadow sets its shadow value to zero. | The bible defines a Sleeper as shadowless, and the HUD should immediately show the gone stage. |
+| 2026-11-24 | `run/main_scene` now points at `scenes/world/hollin_cove.tscn`; the M10 harness instances that exact scene. | The playable build and the integration test exercise the same map and systems rather than parallel debug approximations. |
+| 2026-11-24 | House and lighthouse collision shapes are created at runtime; slice boundaries and notice-board collision are also runtime-built. | Hand-authored collision children vanished when their scenes were instanced in M10, so runtime construction keeps the reusable scenes reliable. |
+| 2026-11-24 | Houses use movement-only walls with an open doorway; they do not occlude daylight rays. | The keeper can enter to clear a hollow, and a frontal Glint can reach the nest without an arbitrary light-layer exemption. |
+| 2026-11-24 | Creature and Glint save records are transient actors with stable IDs and scene paths; persistent actors restore first. | A loaded night keeps live threats and light bursts without hard-coding creature types in `SaveSystem`. |
+| 2026-11-24 | Canonical saves snap floats to 1e-9 before JSON serialization. | Godot's decimal JSON parse can move a float by one ULP; stable precision makes save → load → save byte-identical without visible state loss. |
+| 2026-11-24 | `--m10-load` pauses the tree, defers loading until scene setup ends, then unpauses before the first simulation tick. | Transient actors cannot be added to a busy parent, and startup must not advance the restored snapshot. |
+| 2026-11-24 | Keeper movement/actions and keeper switching pause while dialogue or the dawn summary is open. | Modal UI must not also move or fire the controlled keeper. |
 
 ## Known bugs
 | Date found | Bug | Status |
@@ -148,11 +158,17 @@
 | 2026-11-24 | M9's first headless run hit two GDScript parse errors: an untyped dynamic keeper result and `Object.get()` called with two arguments. | Fixed with an explicit `Node` annotation and a property-existence check; the fast run then completed normally. |
 | 2026-11-24 | M9 save/load initially differed because JSON round-tripped nested integers as floats, and the 64-bit RNG state lost precision as a JSON number. | Fixed by recursively normalizing serialized numbers and storing RNG state as a string; both same-process and restarted re-saves are byte-identical. |
 | 2026-11-24 | M9 chapel placement offset present Sleeper bodies four pixels above their recorded bed position. | Fixed: matching actors now move exactly to the bed anchor; the placement check passes. |
+| 2026-11-24 | Instanced lighthouse/house collision shapes vanished with "modified from inside an instance" warnings, breaking physical beam staffing. | Fixed: remove authored collision children and construct equivalent shapes at runtime. |
+| 2026-11-24 | Night spawning called a missing `Rng.randi_range()` wrapper. | Fixed: added the wrapper; deterministic waves spawn correctly. |
+| 2026-11-24 | M10 save/load differed by one floating-point ULP in a restored shadow value. | Fixed: canonical serialization snaps floats to 1e-9; same-process and restarted snapshots are byte-identical. |
+| 2026-11-24 | Restart loading tried to add transient actors while the parent scene was still busy, then advanced the restored night before verification. | Fixed: pause, defer the initial load until setup completes, and unpause before simulation; all 4 restart checks pass. |
+| 2026-11-24 | Driven windowed setup plus the 10,800-frame runtime exceeded short external timeouts on this GPU; force-killing Godot produced shutdown-only leak errors. | Fixed: the runtime keeps the 60 Hz frame target but also has an independent 180-second render-loop deadline, allowing a clean exit on slow hardware. |
 
 ## Playtest notes (from the human)
 _Feedback from each 🚦 gate goes here._
 
 - 2026-11-24 — 🚦 Gate 1 (M1–M6 test night): approved in conversation ("lets proceed"); no written notes and no changes requested. M7 was started on that approval.
+- 2026-11-24 — 🚦 Gate 2 (M10 slice): awaiting the human's playtest; no feedback recorded yet.
 
 ## Ideas for later (not to be built now)
 -
@@ -174,3 +190,4 @@ _Feedback from each 🚦 gate goes here._
 | 2026-11-24 | M7 completed after the human approved Gate 1 in conversation. Added `Events.dusk_started`/`promise_broken`, `GameState.promises`, three townsfolk (`townsfolk.gd` + `townsfolk_npc.tscn`: dusk walk to the Hall, stubborn Ferrow, dawn return), a data-driven `DialogueBox` with `data/dialogue/{odile,vell,ferrow}.json`, a scene-level `PromiseBoard` (night lit sampling by lantern/daylight within 72 px, dawn kept/broken settlement using tuned trust and a maximum-shadow reward capped at 1.0), `promise_readout.gd`, `scenes/debug/m7_promises.tscn` and a 31-check harness. 31/31 PASS headless; three-minute windowed runtime clean; M1–M6 regressions pass. | M8: Hollow houses. |
 | 2026-11-24 | M8 completed. Added reusable `HouseComponent` + `scenes/world/house.tscn`, `GameState.houses`, `house_hollowed` / `house_cleared` events, a `glint_bursts` group, and townsfolk reactions that keep families in the Hall until their home is cleared. Empty unlit houses hollow at dawn; a daytime lantern + Glint restores the house and calls the family home. Added `house_readout.gd`, `scenes/debug/m8_houses.tscn` and a 21-check harness. 21/21 PASS headless; M1–M7 regressions pass. | M9: Dawn summary, HUD and saving. |
 | 2026-11-24 | M9 completed. Added `NightStats`, a deferred `DawnSummary`, reusable `KeeperHud`, `ChapelBeds`, `Events.creature_destroyed` / `state_loaded`, actor save-state hooks, public keeper selection, and deterministic one-slot `SaveSystem` persistence. The debug harness covers HUD updates, night accounting, promise settlement ordering, chapel placement, same-process save/load and a separate process restart/load. Final results: 26/26 headless checks, 9/9 restart/load checks, byte-identical re-saves, clean three-minute windowed runtime, and M1–M8 regressions all passing. | M10: assemble and play the first slice. |
+| 2026-11-24 | M10 completed. Assembled Hollin Cove as the main scene with lighthouse, docks, Hall, chapel, street and three homes; integrated both keepers, townsfolk routines and promises, Walker/Lurker waves, Burn beam, lantern/Glint, shadow stages, Sleepers, hollow clearing, dawn reporting and F5/F9 persistence. Added runtime collision construction, transient creature/Glint saves, stable float serialization and paused deferred startup loading. Final results: 34/34 headless checks, 4/4 restart/load checks, actual-main-scene 300-frame boot, clean three-minute windowed runtime with no errors/warnings, and M1–M9 regressions passing. | 🚦 Gate 2: stop and ask the human to play the slice; record feedback before any later work. |

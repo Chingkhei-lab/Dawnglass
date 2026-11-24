@@ -77,6 +77,14 @@
     "trust_broken": -2,
     "max_shadow_bonus": 0.1
   },
+  "slice": {
+    "seed": 4107,
+    "spawn_interval": 24.0,
+    "walkers_per_wave": 2,
+    "lurkers_per_wave": 1,
+    "max_creatures": 12,
+    "toast_seconds": 2.0
+  },
   "shadow": {
     "starting": 1.0,
     "maximum": 1.0,

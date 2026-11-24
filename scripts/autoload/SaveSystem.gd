@@ -2,7 +2,10 @@ extends Node
 
 const VERSION := 1
 const SAVE_PATH := "user://dawn_save.json"
-const STATE_GROUPS := ["persons", "townsfolk", "houses"]
+# JSON decimal parsing can shift a float by one ULP.
+const SAVE_PRECISION := 0.000000001
+const STATE_GROUPS := ["persons", "townsfolk", "houses", "slice", "creatures", "glint_bursts"]
+const TRANSIENT_GROUPS := ["creatures", "glint_bursts"]
 
 func has_save() -> bool:
 	return FileAccess.file_exists(SAVE_PATH)
@@ -102,6 +105,8 @@ func _normalize(value: Variant) -> Variant:
 		return value
 	if value is int:
 		return float(value)
+	if value is float:
+		return snappedf(value, SAVE_PRECISION)
 	if value is Dictionary:
 		var result := {}
 		for key in value:
@@ -155,14 +160,45 @@ func _capture_actors() -> Dictionary:
 func _restore_actors(raw: Variant) -> void:
 	if not raw is Dictionary:
 		return
-	var targets := {}
-	for node in _state_nodes():
-		var state: Dictionary = node.capture_state()
-		targets[String(state.get("id", node.name))] = node
 	var actors: Dictionary = raw
+	_clear_transients()
+	for group_name in STATE_GROUPS:
+		if TRANSIENT_GROUPS.has(group_name):
+			continue
+		for node in get_tree().get_nodes_in_group(group_name):
+			if not node.has_method("capture_state"):
+				continue
+			var current: Dictionary = node.capture_state()
+			var id := String(current.get("id", node.name))
+			if actors.has(id) and node.has_method("restore_state"):
+				node.restore_state(actors[id])
 	for id in actors:
-		if targets.has(id) and targets[id].has_method("restore_state"):
-			targets[id].restore_state(actors[id])
+		var state: Variant = actors[id]
+		if state is Dictionary and bool(state.get("transient", false)):
+			_instantiate_actor(String(id), state)
+
+func _clear_transients() -> void:
+	for group_name in TRANSIENT_GROUPS:
+		for node in get_tree().get_nodes_in_group(group_name):
+			var parent := node.get_parent()
+			if parent != null:
+				parent.remove_child(node)
+				node.queue_free()
+
+func _instantiate_actor(id: String, state: Dictionary) -> void:
+	var path := String(state.get("scene", ""))
+	if not ResourceLoader.exists(path):
+		push_error("SaveSystem: missing actor scene %s" % path)
+		return
+	var packed := load(path) as PackedScene
+	if packed == null:
+		push_error("SaveSystem: could not load actor scene %s" % path)
+		return
+	var actor := packed.instantiate()
+	actor.name = id
+	get_tree().current_scene.add_child(actor)
+	if actor.has_method("restore_state"):
+		actor.restore_state(state)
 
 func _restore_active_keeper(active_id: String) -> void:
 	if active_id == "":

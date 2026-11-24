@@ -35,6 +35,7 @@ var controlled := true
 var _shadow: Node = null
 var _lantern: PointLight2D = null
 var _elapsed := 0.0
+var _glint_serial := 0
 
 func _ready() -> void:
 	add_to_group("persons")
@@ -50,7 +51,7 @@ func _physics_process(delta: float) -> void:
 		queue_redraw()
 		return
 	_elapsed += delta
-	if controlled:
+	if controlled and not _input_blocked():
 		var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 		velocity = direction * float(Data.require_value(speed_path))
 		move_and_slide()
@@ -100,6 +101,7 @@ func capture_state() -> Dictionary:
 		"controlled": controlled,
 		"lantern_on": is_lantern_on(),
 		"glint_charges": glint_charges,
+		"glint_serial": _glint_serial,
 		"shadow": shadow_state,
 	}
 
@@ -109,6 +111,7 @@ func restore_state(state: Dictionary) -> void:
 	taken = bool(state.get("taken", taken))
 	controlled = bool(state.get("controlled", controlled))
 	glint_charges = int(state.get("glint_charges", glint_charges))
+	_glint_serial = int(state.get("glint_serial", _glint_serial))
 	set_lantern(bool(state.get("lantern_on", is_lantern_on())))
 	if _shadow != null and _shadow.has_method("restore_state"):
 		_shadow.restore_state(state.get("shadow", {}))
@@ -151,7 +154,9 @@ func fire_glint() -> bool:
 	if glint_charges <= 0:
 		return false
 	glint_charges -= 1
+	_glint_serial += 1
 	var burst := GLINT_SCENE.instantiate()
+	burst.name = "Glint_%s_%d" % [name, _glint_serial]
 	get_tree().current_scene.add_child(burst)
 	burst.global_position = global_position
 	burst.configure(
@@ -184,6 +189,13 @@ func _apply_lantern_radius() -> void:
 	var radius := float(Data.require_value("lighting.lantern_radius"))
 	if _lantern.texture != null:
 		_lantern.texture_scale = radius * 2.0 / float(_lantern.texture.get_width())
+
+func _input_blocked() -> bool:
+	var dialogue := get_tree().get_first_node_in_group("dialogue_boxes")
+	if dialogue != null and dialogue.is_open():
+		return true
+	var summary := get_tree().get_first_node_in_group("dawn_summary")
+	return summary != null and summary.visible
 
 func _nearest_interactable() -> Node:
 	var best: Node = null

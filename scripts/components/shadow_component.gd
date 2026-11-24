@@ -46,6 +46,12 @@ func set_value(new_value: float) -> void:
 	elif value >= _threshold:
 		_below_threshold = false
 
+func reset_state() -> void:
+	maximum = float(Data.require_value("shadow.maximum"))
+	value = minf(float(Data.require_value("shadow.starting")), maximum)
+	_below_threshold = false
+	_time = 0.0
+
 func capture_state() -> Dictionary:
 	return {
 		"value": value,

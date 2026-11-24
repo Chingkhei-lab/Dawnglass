@@ -16,6 +16,15 @@ func _ready() -> void:
 	_lantern_range = float(Data.require_value("creatures.lurker_lantern_notice_range"))
 	_rush_speed = float(Data.require_value("creatures.lurker_rush_speed"))
 
+func capture_state() -> Dictionary:
+	var result := super.capture_state()
+	result["lurker_state"] = state
+	return result
+
+func restore_state(saved: Dictionary) -> void:
+	super.restore_state(saved)
+	state = String(saved.get("lurker_state", STATE_HIDDEN))
+
 func _behave(delta: float) -> void:
 	if state == STATE_HIDDEN:
 		target = _notice()

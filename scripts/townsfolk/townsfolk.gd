@@ -6,11 +6,13 @@ extends Area2D
 @export var body_color := Color("#D9A066")
 
 var home := Vector2.ZERO
+var taken := false
 var _destination := Vector2.ZERO
 var _walking := false
 
 func _ready() -> void:
 	add_to_group("townsfolk")
+	add_to_group("persons")
 	home = global_position
 	_destination = home
 	Events.dusk_started.connect(_on_dusk)
@@ -26,6 +28,8 @@ func _on_dusk() -> void:
 		_walk_to(hall.global_position)
 
 func _on_dawn() -> void:
+	if taken:
+		return
 	var house := _house()
 	if house != null and not house.can_return():
 		_walk_to_hall()
@@ -33,11 +37,11 @@ func _on_dawn() -> void:
 		_walk_to(home)
 
 func _on_house_hollowed(house_id: String) -> void:
-	if house_id == npc_id:
+	if not taken and house_id == npc_id:
 		_walk_to_hall()
 
 func _on_house_cleared(house_id: String) -> void:
-	if house_id == npc_id:
+	if not taken and house_id == npc_id:
 		_walk_to(home)
 
 func _house() -> Node:
@@ -56,7 +60,7 @@ func _walk_to(point: Vector2) -> void:
 	_walking = true
 
 func _physics_process(delta: float) -> void:
-	if not _walking:
+	if taken or not _walking:
 		return
 	var offset := _destination - global_position
 	if offset.length() <= float(Data.require_value("townsfolk.arrive_radius")):
@@ -75,6 +79,7 @@ func capture_state() -> Dictionary:
 		"home": [home.x, home.y],
 		"destination": [_destination.x, _destination.y],
 		"walking": _walking,
+		"taken": taken,
 	}
 
 func restore_state(state: Dictionary) -> void:
@@ -82,6 +87,7 @@ func restore_state(state: Dictionary) -> void:
 	home = _read_vector(state.get("home", []), home)
 	_destination = _read_vector(state.get("destination", []), _destination)
 	_walking = bool(state.get("walking", _walking))
+	taken = bool(state.get("taken", taken))
 	queue_redraw()
 
 func _read_vector(value: Variant, fallback: Vector2) -> Vector2:
@@ -89,13 +95,33 @@ func _read_vector(value: Variant, fallback: Vector2) -> Vector2:
 		return Vector2(float(value[0]), float(value[1]))
 	return fallback
 
+func is_takeable() -> bool:
+	return not taken
+
+func take_shadow() -> void:
+	if taken:
+		return
+	taken = true
+	_walking = false
+	_destination = global_position
+	GameState.mark_sleeper(npc_id)
+	Events.person_taken.emit()
+	queue_redraw()
+
 func interact() -> String:
+	if taken:
+		return "%s is sleeping." % display_name
 	var box := get_tree().get_first_node_in_group("dialogue_boxes")
 	if box != null:
 		box.open(npc_id)
 	return ""
 
 func _draw() -> void:
+	if taken:
+		draw_colored_polygon(_ellipse(Vector2(0, 0), Vector2(12, 4)), Color("#141B29"))
+		draw_rect(Rect2(-10, -7, 20, 7), body_color)
+		draw_circle(Vector2(-12, -4), 5.0, Color("#F4F7FA"))
+		return
 	draw_colored_polygon(_ellipse(Vector2(0, 0), Vector2(9, 3.5)), Color("#141B29"))
 	draw_rect(Rect2(-7, -18, 14, 18), body_color)
 	draw_circle(Vector2(0, -22), 7.0, Color("#F4F7FA"))

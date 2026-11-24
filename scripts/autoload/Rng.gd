@@ -7,3 +7,6 @@ func seed_rng(value: int) -> void:
 
 func randf() -> float:
 	return generator.randf()
+
+func randi_range(from: int, to: int) -> int:
+	return generator.randi_range(from, to)
