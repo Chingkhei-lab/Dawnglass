@@ -4,10 +4,10 @@
 > Status: ✅ done (tested in a real run) · 🟡 in progress · ⬜ not started · ⛔ blocked
 
 ## Current status
-- **Current module:** M7: Townsfolk, the Hall and promises ✅ complete and tested in a real run
-- **Next step:** M8: Hollow houses
+- **Current module:** M8: Hollow houses ✅ complete and tested in a real run
+- **Next step:** M9: Dawn summary, HUD and saving
 - **Godot version installed:** 4.7.2.stable.official.ed1daf0bf (via Godot MCP `get_godot_version`; renderer Forward+, D3D12, AMD Radeon Graphics)
-- **Waiting on the human for:** nothing; 🚦 Gate 1 was approved in conversation without written notes
+- **Waiting on the human for:** nothing
 
 ---
 
@@ -24,21 +24,19 @@
 | M6: Switching keepers | ✅ | Two keepers (Maren, Ivo) with Tab / gamepad Y switching at any time; the camera glides to the new keeper; the keeper left in the lamp room keeps the beam sweeping on auto while a street keeper stands guard; both keepers' shadows keep updating (exposure/recovery) while uncontrolled. 22 checks pass. |
 | 🚦 Gate 1: Is the core fun? | ✅ | Approved in conversation (the human said "lets proceed") without written playtest notes; M7 started on that approval. |
 | M7: Townsfolk, the Hall and promises | ✅ | Three townsfolk (Odile, Sister Vell, Old Ferrow) with a dusk routine: Odile and Vell walk to the Hall while stubborn Ferrow stays home; talking before night opens a data-driven dialogue box whose promise is tracked through the night (lantern or beam on the home) and settled at dawn as kept or broken, changing trust and, when kept, raising the promising keeper's maximum shadow. 31 checks pass; three-minute windowed run clean. |
-| M8: Hollow houses | ⬜ | |
+| M8: Hollow houses | ✅ | Reusable `HouseComponent`: a home whose family is away and which sees no light during the night becomes a dark, creature-filled hollow at dawn; a lantern plus a Glint clears it by day, restores the house and calls the family back from the Hall. House state lives in `GameState.houses`. 21 checks pass; three-minute windowed run clean. |
 | M9: Dawn summary, HUD and saving | ⬜ | |
 | M10: The first playable slice | ⬜ | |
 | 🚦 Gate 2: The slice | ⬜ | Needs the human to play |
 
 ### Tests for the current module
-- ✅ Structure: three townsfolk registered, all three dialogue data files present, `dusk_started` / `promise_broken` signals registered, an empty promise board, and a closed dialogue box.
-- ✅ Dusk routine: Odile and Sister Vell both arrive exactly at the Hall (0.0 / 0.0 px) after a real journey, while Old Ferrow stays at his home more than 100 px from the Hall.
-- ✅ Talking to Odile opens the data-driven box; the promise line applies trust from `data/dialogue/odile.json` (+1), records a bond and creates a promise tied to Maren.
-- ✅ The lantern keeps Odile's home lit for 10.5 s of the required 10.0 s during the night.
-- ✅ At dawn the kept promise adds the tuned trust (+2), raises Maren's maximum shadow 0.80 → 0.90, clears the promise and emits `promise_kept`.
-- ✅ A second promise to Vell, left unlit, costs the tuned trust (−2) at dawn, emits `promise_broken`, and leaves the maximum unchanged.
-- ✅ A promise choice at night is refused with "It is too late tonight." and changes neither trust nor promises.
-- ✅ Readout shows trust and pending promises.
-- ✅ Three-minute windowed run: 31/31 PASS, `M7 RUNTIME CHECK COMPLETE`, no `ERROR`/`WARNING` lines. The runtime covers three sped-up day/night cycles with the townsfolk routines. M1 (16/16), M2 (13/13), M3 (26/26), M4 (22/22), M5 (31/31) and M6 (22/22) re-run with no regressions.
+- ✅ Structure: three reusable houses and three townsfolk registered, all houses start inhabited, `house_hollowed` / `house_cleared` signals exist, and the readout shows the starting states.
+- ✅ At dawn, Odile's dark empty house becomes hollow while Vell's lantern-lit empty house and Ferrow's occupied house stay inhabited.
+- ✅ Hollowing fires one event; Odile cannot leave the Hall for her hollow home, and stubborn Ferrow stays put.
+- ✅ A Glint alone does not clear the house and spends one charge; adding the nearby lantern clears it, changes `GameState.houses["odile"]` to `home`, and fires one clear event.
+- ✅ After clearing, Odile walks back from the Hall to her home; Vell also returns normally and Ferrow remains home.
+- ✅ Readout shows all three restored house states.
+- ✅ Three-minute windowed run: 21/21 PASS, `M8 RUNTIME CHECK COMPLETE`, no `ERROR`/`WARNING` lines. The runtime covers three sped-up day/night cycles and leaves unlit empty houses hollow. M1 (16/16), M2 (13/13), M3 (26/26), M4 (22/22), M5 (31/31), M6 (22/22) and M7 (31/31) re-run with no regressions.
 
 ---
 
@@ -77,6 +75,12 @@
 | 2026-11-24 | GAME_BIBLE §7.2 | Which keeper gains the raised maximum shadow after a kept promise is not stated. | The keeper who accepted the promise gains it at dawn even if the player switched away; a missing keeper skips only the reward. | Open |
 | 2026-11-24 | GAME_BIBLE §7.4 | Whether townsfolk can be taken by creatures in this slice is not stated. | Townsfolk are interactable `Area2D`s but stay out of the `persons` group, so creatures ignore them; they join the person protocol with Hollow Houses. | Open |
 | 2026-11-24 | AGENT_BUILD_GUIDE §5 M7 | No dusk signal existed, and promise settlement needed a broken-promise counterpart. | Added `Events.dusk_started` (emitted by `Clock` on entering dusk) and `Events.promise_broken`; `promise_kept` already existed. | Open |
+| 2026-11-24 | GAME_BIBLE §7.3 / AGENT_BUILD_GUIDE §5 M8 | "Dark", "empty" and "lit" are not defined for a hollow house. | Empty means the matched townsperson is more than 96 px from the house when night starts; any keeper lantern within 72 px or any daylight field covering the nest during the night prevents hollowing. | Open |
+| 2026-11-24 | GAME_BIBLE §7.3 / §8 / AGENT_BUILD_GUIDE §5 M8 | The exact lantern + Glint clearing rule is not specified. | Clearing is daytime-only and requires a lit keeper lantern within 72 px plus a Glint covering the nest centre; a Glint alone or the beam alone does not clear it. | Open |
+| 2026-11-24 | GAME_BIBLE §8 | The Hollow "grows", but no growth amount, timing or behaviour is given. | A hollow is a static drawn nest with three shadow silhouettes and a dark house palette; it does not move, attack or grow yet. | Open |
+| 2026-11-24 | GAME_BIBLE §7.3 | What the family does while its home is hollow is not stated. | They wait in the Hall and walk home on `house_cleared`; scenes without a `HouseComponent` keep the M7 dawn-return behaviour. | Open |
+| 2026-11-24 | GAME_BIBLE §7.3 | No house-state storage format exists before saving arrives. | `GameState.houses` stores `home` / `hollow` keyed by `npc_id`; M9 can serialise it with the rest of the state. | Open |
+| 2026-11-24 | GAME_BIBLE §7.3 | House walls and the light path into a hollow are not specified. | Debug houses are visual-only, so the Glint ray reaches the nest unobstructed; the real map will need a doorway/window path or an exempt wall layer. | Open |
 
 ## Decisions made
 | Date | Decision | Why |
@@ -109,6 +113,10 @@
 | 2026-11-24 | Dialogue lives in `data/dialogue/<npc_id>.json` and is applied by `DialogueBox`; promise acceptance asks the `promise_board` group and the active keeper. | Data-driven trust/bond/flags per the guide, and the box stays independent of which keeper the player controls. |
 | 2026-11-24 | Townsfolk are `Area2D`s so the keeper's existing interaction probe finds them; the Hall is found through a `hall` group. | Reuses the M1 interaction path and lets scenes place the Hall freely. |
 | 2026-11-24 | A promise can only be accepted before night; choosing it at night shows "It is too late tonight." and applies no effects. | Matches the guide's "talking to them before night gives a promise" and gives a clear refusal instead of a silent failure. |
+| 2026-11-24 | `run/main_scene` points at `scenes/debug/m8_houses.tscn` during M8. | Same main-scene convention as earlier modules. |
+| 2026-11-24 | `HouseComponent` owns the placeholder house art, night lighting check, hollow/clear rules and family events; persistent state lives in `GameState.houses`. | Keeps the rule in one reusable scene node and gives M9 a save-friendly state dictionary. |
+| 2026-11-24 | Glints join a dedicated `glint_bursts` group in addition to `daylight_fields`. | The house can require the guide's specific Glint clearing tool without treating the beam or Dawn Pulse as equivalent. |
+| 2026-11-24 | Townsfolk react to `house_hollowed` / `house_cleared` and check their matched house before returning at dawn. | Signal order stays safe, and M7 scenes with no house component keep their old behaviour. |
 
 ## Known bugs
 | Date found | Bug | Status |
@@ -122,6 +130,8 @@
 | 2026-11-24 | M5 readout and test failed to parse on `shadow.value` / `get_node_or_null` results typed as Variant. | Fixed: explicit `Node` and `float` annotations. |
 | 2026-11-24 | M6 step-3 burst cleanup freed every `daylight_fields` node, including the beam, so later steps hit a freed instance. | Fixed: the debug helper skips the beam. |
 | 2026-11-24 | Condensing the M7 harness merged two `var` declarations ("Invalid numeric notation"), so the script failed to load and the `--fast` run hung instead of quitting. | Fixed and re-verified; when a fast run hangs, check its log for `SCRIPT ERROR` (the same mode occurred in M5). |
+| 2026-11-24 | M8 house roof drawing used `PackedVector2Array(x, y, ...)`, which has no matching GDScript constructor. | Fixed: build the polygon from an array of `Vector2` values. |
+| 2026-11-24 | M8 readout used title-case names while the checks expected uppercase state labels. | Fixed: names and states are uppercase; 21/21 checks now pass. |
 
 ## Playtest notes (from the human)
 _Feedback from each 🚦 gate goes here._
@@ -146,3 +156,4 @@ _Feedback from each 🚦 gate goes here._
 | 2026-11-24 | M5 completed. Added `beam.gd` (lamp-room staffing, mouse/right-stick aim with speed and acceleration limits plus braking, focus mode, clamped auto sweep with end pauses, cone/range/occlusion daylight check, Dawnglass and operator drain) and `dawn_pulse.gd` (expanding annulus daylight ring with charge/shadow cost), lighthouse debug scene with a rock occluder, `beam_readout.gd` and a 31-check harness. 31/31 PASS headless; three-minute windowed runtime clean with Walkers spawned into the sweeping beam. | Wait for the human's go-ahead, then M6 (Gate 1 comes after M6). |
 | 2026-11-24 | M6 completed. Added the `controlled` flag and `body_color` to the keeper controller, `ivo.tscn`, a scene-level `KeeperSwitch` (Tab / gamepad Y, camera retarget via new `FollowCamera.set_target()`), beam mode sync to the operator's control state, `switch_readout.gd`, `scenes/debug/m6_switch.tscn` and a 22-check harness. 22/22 PASS headless; three-minute windowed runtime clean. | 🚦 Gate 1: human plays a test night and gives feedback before M7. |
 | 2026-11-24 | M7 completed after the human approved Gate 1 in conversation. Added `Events.dusk_started`/`promise_broken`, `GameState.promises`, three townsfolk (`townsfolk.gd` + `townsfolk_npc.tscn`: dusk walk to the Hall, stubborn Ferrow, dawn return), a data-driven `DialogueBox` with `data/dialogue/{odile,vell,ferrow}.json`, a scene-level `PromiseBoard` (night lit sampling by lantern/daylight within 72 px, dawn kept/broken settlement using tuned trust and a maximum-shadow reward capped at 1.0), `promise_readout.gd`, `scenes/debug/m7_promises.tscn` and a 31-check harness. 31/31 PASS headless; three-minute windowed runtime clean; M1–M6 regressions pass. | M8: Hollow houses. |
+| 2026-11-24 | M8 completed. Added reusable `HouseComponent` + `scenes/world/house.tscn`, `GameState.houses`, `house_hollowed` / `house_cleared` events, a `glint_bursts` group, and townsfolk reactions that keep families in the Hall until their home is cleared. Empty unlit houses hollow at dawn; a daytime lantern + Glint restores the house and calls the family home. Added `house_readout.gd`, `scenes/debug/m8_houses.tscn` and a 21-check harness. 21/21 PASS headless; M1–M7 regressions pass. | M9: Dawn summary, HUD and saving. |

@@ -12,6 +12,7 @@ var time_left := 0.0
 
 func _ready() -> void:
 	add_to_group("daylight_fields")
+	add_to_group("glint_bursts")
 
 func configure(radius_value: float, duration_value: float, mask: int) -> void:
 	radius = radius_value

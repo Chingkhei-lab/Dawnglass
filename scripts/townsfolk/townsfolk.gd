@@ -15,6 +15,8 @@ func _ready() -> void:
 	_destination = home
 	Events.dusk_started.connect(_on_dusk)
 	Events.dawn.connect(_on_dawn)
+	Events.house_hollowed.connect(_on_house_hollowed)
+	Events.house_cleared.connect(_on_house_cleared)
 
 func _on_dusk() -> void:
 	if stubborn:
@@ -24,7 +26,30 @@ func _on_dusk() -> void:
 		_walk_to(hall.global_position)
 
 func _on_dawn() -> void:
-	_walk_to(home)
+	var house := _house()
+	if house != null and not house.can_return():
+		_walk_to_hall()
+	else:
+		_walk_to(home)
+
+func _on_house_hollowed(house_id: String) -> void:
+	if house_id == npc_id:
+		_walk_to_hall()
+
+func _on_house_cleared(house_id: String) -> void:
+	if house_id == npc_id:
+		_walk_to(home)
+
+func _house() -> Node:
+	for node in get_tree().get_nodes_in_group("houses"):
+		if String(node.get("npc_id")) == npc_id:
+			return node
+	return null
+
+func _walk_to_hall() -> void:
+	var hall := get_tree().get_first_node_in_group("hall") as Node2D
+	if hall != null:
+		_walk_to(hall.global_position)
 
 func _walk_to(point: Vector2) -> void:
 	_destination = point

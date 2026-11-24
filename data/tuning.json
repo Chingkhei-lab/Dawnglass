@@ -65,6 +65,11 @@
     "walk_speed": 60.0,
     "arrive_radius": 4.0
   },
+  "houses": {
+    "empty_radius": 96.0,
+    "light_radius": 72.0,
+    "clear_radius": 72.0
+  },
   "promise": {
     "lit_radius": 72.0,
     "lit_seconds": 10.0,
