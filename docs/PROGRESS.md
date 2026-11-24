@@ -22,7 +22,7 @@
 | M4: Creatures (2 types) | ✅ | Walker chases the nearest person; Lurker waits in dark and rushes a nearby person or a lit lantern within its notice range; both ignore lantern light; Glint daylight destroys them; contact turns a person into a GameState-marked Sleeper and fires `person_taken`; keeper shadow leans toward nearby creatures. 22 checks pass; windowed run includes a 40-creature FPS sample. |
 | M5: The lighthouse beam | ✅ | Staffed lamp room drives a daylight beam with mouse/right-stick aim, limited turn speed and acceleration (240 deg/s² to 90 deg/s), a focused narrow mode, a predictable auto sweep with a 120° gap, and a rock-occluded cone; the beam drains stored Dawnglass and the operator's shadow, and the Dawn Pulse ring destroys creatures at a large charge/shadow cost. 31 checks pass; three-minute windowed run clean. |
 | M6: Switching keepers | ✅ | Two keepers (Maren, Ivo) with Tab / gamepad Y switching at any time; the camera glides to the new keeper; the keeper left in the lamp room keeps the beam sweeping on auto while a street keeper stands guard; both keepers' shadows keep updating (exposure/recovery) while uncontrolled. 22 checks pass. |
-| 🚦 Gate 1: Is the core fun? | ⬜ | Needs the human to play |
+| 🚦 Gate 1: Is the core fun? | 🟡 | Waiting on the human: play the current main scene (M1–M6 test night) and write feedback in "Playtest notes". Do not start M7 until approved or given changes. |
 | M7: Townsfolk, the Hall and promises | ⬜ | |
 | M8: Hollow houses | ⬜ | |
 | M9: Dawn summary, HUD and saving | ⬜ | |
@@ -67,6 +67,7 @@
 | 2026-11-24 | AGENT_BUILD_GUIDE §5 M6 / GAME_BIBLE §7.1 | The one-button switch key is not specified. | Tab on keyboard, Y on gamepad (provisional). | Open |
 | 2026-11-24 | AGENT_BUILD_GUIDE §5 M6 | What "keeps doing their last job" means for an idle street keeper is not defined. | The uncontrolled keeper stops in place and keeps their lantern state ("standing guard"); no path-following yet. | Open |
 | 2026-11-24 | GAME_BIBLE §7.1 | Whether a taken keeper can be switched to is not stated. | Switching does not check Sleeper state yet; a taken keeper simply ignores input. | Open |
+| 2026-11-24 | GAME_BIBLE §6.3 | No input is specified for the Dawn Pulse. | Currently method-only (`Beam.fire_dawn_pulse()`, exercised by the M5 harness); bind to a key together with the HUD in M9. | Open |
 
 ## Decisions made
 | Date | Decision | Why |
