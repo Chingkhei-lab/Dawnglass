@@ -29,11 +29,13 @@ const BUTTON_BINDINGS := [
 @onready var interaction_probe: Area2D = $InteractionProbe
 
 var glint_charges := 0
+var taken := false
 var _shadow: Node = null
 var _lantern: PointLight2D = null
 var _elapsed := 0.0
 
 func _ready() -> void:
+	add_to_group("persons")
 	_bind_input()
 	_shadow = get_node_or_null("ShadowComponent")
 	_lantern = get_node_or_null("Lantern") as PointLight2D
@@ -41,6 +43,9 @@ func _ready() -> void:
 	_apply_lantern_radius()
 
 func _physics_process(delta: float) -> void:
+	if taken:
+		queue_redraw()
+		return
 	_elapsed += delta
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	velocity = direction * float(Data.require_value(speed_path))
@@ -68,6 +73,34 @@ func set_lantern(enabled: bool) -> void:
 
 func is_lantern_on() -> bool:
 	return _lantern != null and _lantern.enabled
+
+func is_takeable() -> bool:
+	return not taken
+
+func take_shadow() -> void:
+	if taken:
+		return
+	taken = true
+	GameState.mark_sleeper(name)
+	Events.person_taken.emit()
+
+func shadow_lean() -> Vector2:
+	var lean_range := float(Data.require_value("creatures.lean_range"))
+	var nearest: Node2D = null
+	var nearest_distance := lean_range
+	for node in get_tree().get_nodes_in_group("creatures"):
+		var creature := node as Node2D
+		if creature == null:
+			continue
+		var distance := global_position.distance_to(creature.global_position)
+		if distance <= nearest_distance:
+			nearest = creature
+			nearest_distance = distance
+	if nearest == null:
+		return Vector2.ZERO
+	var direction := (nearest.global_position - global_position).normalized()
+	var strength := 1.0 - nearest_distance / maxf(lean_range, 0.001)
+	return direction * float(Data.require_value("creatures.lean_max")) * strength
 
 func fire_glint() -> bool:
 	if glint_charges <= 0:
@@ -160,7 +193,11 @@ func _draw() -> void:
 	var shadow_alpha := 0.8
 	if _shadow != null:
 		shadow_alpha = _shadow.visual_alpha(_elapsed)
-	draw_colored_polygon(_ellipse(Vector2(0, 0), Vector2(9, 3.5)), Color(0.078, 0.106, 0.161, shadow_alpha))
+	var lean := shadow_lean()
+	draw_colored_polygon(
+		_ellipse(lean, Vector2(9.0 + lean.length() * 0.25, 3.5)),
+		Color(0.078, 0.106, 0.161, shadow_alpha)
+	)
 	draw_rect(Rect2(-7, -18, 14, 18), Color("#7CA5B8"))
 	draw_circle(Vector2(0, -22), 7.0, Color("#F4F7FA"))
 

@@ -4,10 +4,10 @@
 > Status: ✅ done (tested in a real run) · 🟡 in progress · ⬜ not started · ⛔ blocked
 
 ## Current status
-- **Current module:** M3: Lights and shadows ✅ complete and tested in a real run
-- **Next step:** M4: Creatures (after the human's go-ahead)
+- **Current module:** M4: Creatures ✅ complete and tested in a real run
+- **Next step:** M5: The lighthouse beam (after the human's go-ahead)
 - **Godot version installed:** 4.7.2.stable.official.ed1daf0bf (via Godot MCP `get_godot_version`; renderer Forward+, D3D12, AMD Radeon Graphics)
-- **Waiting on the human for:** go-ahead to start M4
+- **Waiting on the human for:** go-ahead to start M5
 
 ---
 
@@ -19,7 +19,7 @@
 | M1: Moving one keeper | ✅ | Keeper `CharacterBody2D` with keyboard/gamepad binding, house and boundary collisions, base-anchored y-sort, smooth follow camera, sign interaction text box. All 16 checks pass; three-minute run clean. |
 | M2: Day and night clock | ✅ | Clock runs day→dusk→night→dawn from tuning (720/45/300/45 s, cycle 1110 s); `CanvasModulate` blends palette colours through dusk and dawn; Dawnglass charges to 100% by nightfall; debug readout shows day, phase, phase time and charge. 13 checks pass; three-minute windowed run clean. |
 | M3: Lights and shadows | ✅ | Lantern `PointLight2D` with cast shadows and no gameplay effect; Glint bursts with charges, shadow cost and a wall-aware `DaylightCheck` raycast; `ShadowComponent` with value/maximum, exposure loss, sunlight recovery, the 30% maximum drop and the three visible stages. 26 checks pass; three-minute windowed run clean; M1/M2 re-verified. |
-| M4: Creatures (2 types) | ⬜ | |
+| M4: Creatures (2 types) | ✅ | Walker chases the nearest person; Lurker waits in dark and rushes a nearby person or a lit lantern within its notice range; both ignore lantern light; Glint daylight destroys them; contact turns a person into a GameState-marked Sleeper and fires `person_taken`; keeper shadow leans toward nearby creatures. 22 checks pass; windowed run includes a 40-creature FPS sample. |
 | M5: The lighthouse beam | ⬜ | |
 | M6: Switching keepers | ⬜ | |
 | 🚦 Gate 1: Is the core fun? | ⬜ | Needs the human to play |
@@ -30,13 +30,16 @@
 | 🚦 Gate 2: The slice | ⬜ | Needs the human to play |
 
 ### Tests for the current module
-- ✅ The lantern lights the area but has no gameplay effect. Cast-shadow `PointLight2D` toggled off and on for 20 frames left the shadow value unchanged.
-- ✅ The Glint's daylight check is blocked by walls. Shared `DaylightCheck.is_lit()` passes a clear point, fails the same distance behind the wall, and fails beyond range.
-- ✅ Shadow drops while exposed by the tuned amount, and the visible shadow fades with it. 0.10 lost in 2 s at 0.05/s; normal above 60%, flickering 60–30% with a varying alpha, faint and dimmer below 30%.
-- ✅ Shadow recovers in sunlight but never above the current maximum. 0.04 gained in 2 s at 0.02/s, stopping exactly at the 80% maximum.
-- ✅ Falling below 30% lowers the maximum once per crossing. 100% → 90% at the first crossing, unchanged while staying low, then 90% → 80% after recovering above 30%.
-- ✅ Glint charges and cost. 3 charges, one per burst, 0.05 shadow per use, refuses to fire at 0.
-- ✅ Three-minute run: 26/26 PASS, `M3 RUNTIME CHECK COMPLETE`, log scan found no `ERROR` or `WARNING` lines. M1 and M2 test scenes were re-run afterwards and still pass.
+- ✅ Villager starts as a takeable person; keeper is also a takeable person and exposes shadow lean.
+- ✅ Walker closes on the nearest person and retargets correctly (79.3 px in 2 s).
+- ✅ A lit lantern does not divert the Walker; it stays on the nearest person and does not take them from a distance.
+- ✅ An unlit lantern is ignored by the Lurker (hidden, no drift); a lit lantern within 140 px makes it rush the lantern holder.
+- ✅ A person within the Lurker trigger radius (120 px) makes it rush immediately.
+- ✅ Lantern light leaves both creatures alive after 30 frames; a Glint burst destroys both within 4 frames.
+- ✅ A Walker reaching a villager turns them into a Sleeper: body stays, no longer takeable, id `villager` in `GameState.sleepers`, `person_taken` fired once, creature leaves.
+- ✅ Shadow lean is non-zero and points at a creature 50 px away (3.2 px offset) and returns to zero beyond 80 px.
+- ✅ Readout shows creature and sleeper counts.
+- ✅ Three-minute windowed run: 22/22 PASS plus the 40-creature spawn and FPS checks (average 60 FPS), `M4 RUNTIME CHECK COMPLETE`, no `ERROR`/`WARNING` lines. M1 (16/16), M2 (13/13) and M3 (26/26) re-run with no regressions.
 
 ---
 
@@ -54,6 +57,10 @@
 | 2026-11-24 | GAME_BIBLE §6.1 | Glint radius, burst duration and the recharge rule are not specified. | 112 px radius, 4 s burst, 3 charges; no recharge implemented yet. | Open |
 | 2026-11-24 | GAME_BIBLE §7.2 / guide §4 | Guide says `GameState` holds shadow values; there is no save format yet. | Shadow value and maximum live in each keeper's `ShadowComponent` until saving arrives (M9). | Open |
 | 2026-11-24 | GAME_BIBLE §6.1 | Input keys for the lantern and Glint are unspecified. | F / gamepad B toggles the lantern; Q / gamepad X fires the Glint. | Open |
+| 2026-11-24 | GAME_BIBLE §7.4 | Speeds, detection and contact radii, and the shadow-lean distance are not given. | Walker 40 px/s, Lurker rush 70 px/s, Lurker trigger 120 px, lantern notice 140 px, contact 10 px, lean range 80 px with an 8 px maximum. | Open |
+| 2026-11-24 | GAME_BIBLE §7.4 | Whether creatures die in ordinary daytime sunlight (as opposed to Dawnglass light) is not specified. | Only Dawnglass daylight (Glint now, beam later) kills them; daytime hiding/spawning arrives with later modules. | Open |
+| 2026-11-24 | GAME_BIBLE §7.4 | Which people creatures can take is not narrowed down. | Any takeable node in the `persons` group (keepers and villagers); Sleepers are ignored. | Open |
+| 2026-11-24 | AGENT_BUILD_GUIDE §5 M4 | The "steady 60 FPS" test has no measurement rule. | Windowed run spawns 40 Walkers (contact disabled so they stay alive) and averages `Engine.get_frames_per_second()` over 600 frames after a 1 s warmup; floor is `creatures.fps_target` = 55. Fast headless runs skip it. | Open |
 
 ## Decisions made
 | Date | Decision | Why |
@@ -67,6 +74,11 @@
 | 2026-11-24 | A Glint burst is itself a daylight field (group `daylight_fields`). | Anyone standing in it loses shadow at the tuned rate; the user also pays `glint_cost`. |
 | 2026-11-24 | `run/main_scene` points at `scenes/debug/m3_lights.tscn` during M3. | Same main-scene convention as M1 and M2. |
 | 2026-11-24 | Settings equal to engine defaults (60 Hz physics, stretch aspect `keep`) were pruned from `project.godot` when Godot rewrote the file. | Behaviour unchanged; verified by the M0 and M2 checks. |
+| 2026-11-24 | `run/main_scene` points at `scenes/debug/m4_creatures.tscn` during M4. | Same main-scene convention as earlier modules. |
+| 2026-11-24 | Creatures are plain `Node2D` with distance checks, not physics bodies. | Contact and detection need no collision shapes; 40 creatures cost almost nothing. |
+| 2026-11-24 | Person protocol via the `persons` group: `is_takeable()` and `take_shadow()`. | Let creatures work with any takeable actor (keeper or stand-in villager) without type coupling; Sleepers are skipped. |
+| 2026-11-24 | `Sleeper` state stored as id strings in `GameState.sleepers`; `Events.person_taken` keeps its no-argument signature. | Matches the existing signal and gives later modules a simple save-friendly list. |
+| 2026-11-24 | `villager.tscn` is a minimal stand-in for M4 only. | M7 replaces it with the real townsfolk and routines; the person protocol already matches. |
 
 ## Known bugs
 | Date found | Bug | Status |
@@ -75,6 +87,7 @@
 | 2026-11-24 | Follow camera's exported node target did not resolve in the hand-written scene, leaving it at the origin. | Fixed: switched to `@export var target_path: NodePath`. |
 | 2026-11-24 | `Clock` was declared before `Data` in autoloads, so startup saw an empty tuning dictionary and the clock ran a 0 s cycle. | Fixed: `Data` moved to the first autoload slot; zero-length phases are also ignored safely. |
 | 2026-11-24 | `const PHASE_ORDER := PackedStringArray([...])` failed to parse in Godot 4.7 (`isn't a constant expression`). | Fixed: plain array constant. |
+| 2026-11-24 | `shadow_lean()` failed to parse: `nearest` was typed `Node`, so `(nearest.global_position - global_position)` had no inferred type. | Fixed: keep the nearest creature in a `Node2D` variable (cast from the group array). |
 
 ## Playtest notes (from the human)
 _Feedback from each 🚦 gate goes here._
@@ -93,3 +106,4 @@ _Feedback from each 🚦 gate goes here._
 | 2026-11-24 | M1 completed. Root cause of the launch failure: a malformed hand-written `[input]` block in `project.godot` made Godot abort before logging. Removed it and bound movement (WASD + left stick) and interact (E + gamepad A) in code. Rewrote the debug area as 1024×640 with base-anchored house/keeper y-sort, removed the house `z_index` override, added wall collisions, and replaced the structural-only test with a driven harness. Fixed the follow camera's node target (`target_path` NodePath). Final run: 16/16 PASS, `M1 TESTS PASS`, `M1 RUNTIME CHECK COMPLETE`, and a log scan found no `ERROR`/`WARNING` lines over the three-minute run. | Wait for the human's go-ahead, then M2. |
 | 2026-11-24 | Committed and pushed the M0/M1 baseline to GitHub (`7c7bc96`), then built M2. Added the `clock` tuning block, full `Clock` autoload (day→dusk→night→dawn, two-stage smooth sky tint, Dawnglass charging, `Events` signals), `day_night_tint.gd`, `clock_readout.gd`, `scenes/debug/m2_clock.tscn` and a 13-check driven harness. Fixed two runtime bugs: autoload order (`Clock` read before `Data`) and a non-constant `PackedStringArray` const. Headless and windowed runs: 13/13 PASS, cycle 1110.00 s vs configured 1110.00 s, three-minute runtime clean, no `ERROR`/`WARNING` lines. | Wait for the human's go-ahead, then M3. |
 | 2026-11-24 | M3 completed. Added `DaylightCheck` (range + angle + wall raycast), `ShadowComponent` (value/maximum, exposure loss, sunlight recovery, the 30% maximum drop, stage and flicker alphas), a cast-shadow lantern `PointLight2D`, Glint bursts with charges and shadow cost, the reusable `maren.tscn` keeper, `shadow_readout.gd`, `scenes/debug/m3_lights.tscn` and a 26-check harness. 26/26 PASS headless and windowed; three-minute runtime clean; M1 (16/16) and M2 (13/13) re-run with no regressions. | Wait for the human's go-ahead, then M4. |
+| 2026-11-24 | M4 completed. Added `creature_base.gd` (group registration, daylight death via `daylight_fields`, nearest-person search, distance contact), `walker.gd` (chases nearest person), `lurker.gd` (hidden until a person enters 120 px or a lit lantern enters 140 px), a `persons` protocol (`is_takeable`/`take_shadow`) on the keeper plus `villager.tscn`, `GameState.sleepers` with `mark_sleeper`, keeper shadow lean, `creature_readout.gd`, `scenes/debug/m4_creatures.tscn` and a 22-check harness; windowed runtime adds a 40-creature FPS sample. 22/22 PASS headless and windowed. | Wait for the human's go-ahead, then M5. |

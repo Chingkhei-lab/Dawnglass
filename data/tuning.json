@@ -30,6 +30,17 @@
     "glint_duration": 4.0,
     "obstacle_layer": 2
   },
+  "creatures": {
+    "walker_speed": 40.0,
+    "lurker_rush_speed": 70.0,
+    "lurker_trigger_radius": 120.0,
+    "lurker_lantern_notice_range": 140.0,
+    "contact_radius": 10.0,
+    "lean_range": 80.0,
+    "lean_max": 8.0,
+    "fps_count": 40,
+    "fps_target": 55.0
+  },
   "shadow": {
     "starting": 1.0,
     "maximum": 1.0,

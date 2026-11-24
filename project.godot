@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Dawnglass"
-run/main_scene="res://scenes/debug/m3_lights.tscn"
+run/main_scene="res://scenes/debug/m4_creatures.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
