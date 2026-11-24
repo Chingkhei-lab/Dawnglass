@@ -82,15 +82,52 @@ func set_lantern(enabled: bool) -> void:
 func is_lantern_on() -> bool:
 	return _lantern != null and _lantern.enabled
 
+func person_id() -> String:
+	return name
+
 func is_takeable() -> bool:
 	return not taken
+
+func capture_state() -> Dictionary:
+	var shadow_state: Dictionary = {}
+	if _shadow != null and _shadow.has_method("capture_state"):
+		shadow_state = _shadow.capture_state()
+	return {
+		"id": person_id(),
+		"position": [global_position.x, global_position.y],
+		"velocity": [velocity.x, velocity.y],
+		"taken": taken,
+		"controlled": controlled,
+		"lantern_on": is_lantern_on(),
+		"glint_charges": glint_charges,
+		"shadow": shadow_state,
+	}
+
+func restore_state(state: Dictionary) -> void:
+	global_position = _read_vector(state.get("position", []), global_position)
+	velocity = _read_vector(state.get("velocity", []), Vector2.ZERO)
+	taken = bool(state.get("taken", taken))
+	controlled = bool(state.get("controlled", controlled))
+	glint_charges = int(state.get("glint_charges", glint_charges))
+	set_lantern(bool(state.get("lantern_on", is_lantern_on())))
+	if _shadow != null and _shadow.has_method("restore_state"):
+		_shadow.restore_state(state.get("shadow", {}))
+	queue_redraw()
+
+func _read_vector(value: Variant, fallback: Vector2) -> Vector2:
+	if value is Array and value.size() >= 2:
+		return Vector2(float(value[0]), float(value[1]))
+	return fallback
 
 func take_shadow() -> void:
 	if taken:
 		return
 	taken = true
+	if _shadow != null:
+		_shadow.set_value(0.0)
 	GameState.mark_sleeper(name)
 	Events.person_taken.emit()
+	queue_redraw()
 
 func shadow_lean() -> Vector2:
 	var lean_range := float(Data.require_value("creatures.lean_range"))

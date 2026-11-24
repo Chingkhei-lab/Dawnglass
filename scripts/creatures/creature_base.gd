@@ -10,6 +10,7 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if _in_daylight():
+		Events.creature_destroyed.emit()
 		queue_free()
 		return
 	_behave(delta)

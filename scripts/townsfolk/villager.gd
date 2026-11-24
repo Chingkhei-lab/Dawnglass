@@ -7,6 +7,23 @@ var taken := false
 func _ready() -> void:
 	add_to_group("persons")
 
+func person_id() -> String:
+	return villager_id
+
+func capture_state() -> Dictionary:
+	return {
+		"id": person_id(),
+		"position": [global_position.x, global_position.y],
+		"taken": taken,
+	}
+
+func restore_state(state: Dictionary) -> void:
+	var position_value: Variant = state.get("position", [])
+	if position_value is Array and position_value.size() >= 2:
+		global_position = Vector2(float(position_value[0]), float(position_value[1]))
+	taken = bool(state.get("taken", taken))
+	queue_redraw()
+
 func is_takeable() -> bool:
 	return not taken
 

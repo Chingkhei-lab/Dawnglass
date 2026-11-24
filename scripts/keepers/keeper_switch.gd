@@ -25,11 +25,21 @@ func switch_next() -> void:
 	var keepers := _keepers()
 	if keepers.size() < 2:
 		return
-	keepers[_index].controlled = false
-	keepers[_index].velocity = Vector2.ZERO
-	_index = (_index + 1) % keepers.size()
-	keepers[_index].controlled = true
+	select_keeper(keepers[(_index + 1) % keepers.size()])
+
+func select_keeper(keeper: Node) -> bool:
+	var keepers := _keepers()
+	var next_index := keepers.find(keeper)
+	if next_index < 0:
+		return false
+	if _index < keepers.size():
+		keepers[_index].velocity = Vector2.ZERO
+	_index = next_index
+	for index in range(keepers.size()):
+		keepers[index].controlled = index == _index
 	_focus(keepers[_index])
+	Events.keeper_switched.emit()
+	return true
 
 func active_keeper() -> Node:
 	var keepers := _keepers()

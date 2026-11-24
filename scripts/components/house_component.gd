@@ -17,6 +17,18 @@ func _ready() -> void:
 	Events.dawn.connect(_on_dawn)
 	queue_redraw()
 
+func capture_state() -> Dictionary:
+	return {
+		"id": npc_id,
+		"empty_tonight": _empty_tonight,
+		"was_lit": _was_lit,
+	}
+
+func restore_state(state: Dictionary) -> void:
+	_empty_tonight = bool(state.get("empty_tonight", _empty_tonight))
+	_was_lit = bool(state.get("was_lit", _was_lit))
+	queue_redraw()
+
 func state() -> String:
 	return String(GameState.houses.get(npc_id, "home"))
 

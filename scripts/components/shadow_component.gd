@@ -46,6 +46,20 @@ func set_value(new_value: float) -> void:
 	elif value >= _threshold:
 		_below_threshold = false
 
+func capture_state() -> Dictionary:
+	return {
+		"value": value,
+		"maximum": maximum,
+		"below_threshold": _below_threshold,
+		"time": _time,
+	}
+
+func restore_state(state: Dictionary) -> void:
+	value = clampf(float(state.get("value", value)), 0.0, 1.0)
+	maximum = clampf(float(state.get("maximum", maximum)), 0.01, 1.0)
+	_below_threshold = bool(state.get("below_threshold", _below_threshold))
+	_time = float(state.get("time", _time))
+
 func stage() -> String:
 	if value <= 0.0:
 		return STAGE_GONE

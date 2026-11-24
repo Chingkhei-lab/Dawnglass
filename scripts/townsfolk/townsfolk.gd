@@ -65,6 +65,30 @@ func _physics_process(delta: float) -> void:
 		return
 	global_position += offset.normalized() * float(Data.require_value("townsfolk.walk_speed")) * delta
 
+func person_id() -> String:
+	return npc_id
+
+func capture_state() -> Dictionary:
+	return {
+		"id": person_id(),
+		"position": [global_position.x, global_position.y],
+		"home": [home.x, home.y],
+		"destination": [_destination.x, _destination.y],
+		"walking": _walking,
+	}
+
+func restore_state(state: Dictionary) -> void:
+	global_position = _read_vector(state.get("position", []), global_position)
+	home = _read_vector(state.get("home", []), home)
+	_destination = _read_vector(state.get("destination", []), _destination)
+	_walking = bool(state.get("walking", _walking))
+	queue_redraw()
+
+func _read_vector(value: Variant, fallback: Vector2) -> Vector2:
+	if value is Array and value.size() >= 2:
+		return Vector2(float(value[0]), float(value[1]))
+	return fallback
+
 func interact() -> String:
 	var box := get_tree().get_first_node_in_group("dialogue_boxes")
 	if box != null:

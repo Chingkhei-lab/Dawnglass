@@ -20,3 +20,7 @@ signal promise_broken
 signal house_hollowed(house_id: String)
 @warning_ignore("unused_signal")
 signal house_cleared(house_id: String)
+@warning_ignore("unused_signal")
+signal creature_destroyed
+@warning_ignore("unused_signal")
+signal state_loaded

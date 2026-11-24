@@ -1,0 +1,93 @@
+[gd_scene load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://scripts/debug/m9_test.gd" id="1_test"]
+[ext_resource type="PackedScene" path="res://scenes/keepers/maren.tscn" id="2_maren"]
+[ext_resource type="PackedScene" path="res://scenes/keepers/ivo.tscn" id="3_ivo"]
+[ext_resource type="PackedScene" path="res://scenes/townsfolk/villager.tscn" id="4_villager"]
+[ext_resource type="PackedScene" path="res://scenes/townsfolk/townsfolk_npc.tscn" id="5_npc"]
+[ext_resource type="Script" path="res://scripts/keepers/keeper_switch.gd" id="6_switch"]
+[ext_resource type="Script" path="res://scripts/world/follow_camera.gd" id="7_camera"]
+[ext_resource type="Script" path="res://scripts/world/day_night_tint.gd" id="8_tint"]
+[ext_resource type="Script" path="res://scripts/world/promise_board.gd" id="9_board"]
+[ext_resource type="Script" path="res://scripts/ui/night_stats.gd" id="10_stats"]
+[ext_resource type="PackedScene" path="res://scenes/world/chapel.tscn" id="11_chapel"]
+[ext_resource type="PackedScene" path="res://scenes/ui/keeper_hud.tscn" id="12_hud"]
+[ext_resource type="PackedScene" path="res://scenes/ui/dawn_summary.tscn" id="13_summary"]
+
+[node name="M9DawnDebug" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1_test")
+
+[node name="Background" type="Polygon2D" parent="."]
+z_index = -10
+polygon = PackedVector2Array(0, 0, 1024, 0, 1024, 640, 0, 640)
+color = Color(0.086, 0.145, 0.2, 1)
+
+[node name="Ground" type="Polygon2D" parent="."]
+z_index = -9
+polygon = PackedVector2Array(0, 260, 1024, 260, 1024, 640, 0, 640)
+color = Color(0.106, 0.231, 0.267, 1)
+
+[node name="Hall" type="Node2D" parent="."]
+position = Vector2(320, 120)
+groups = ["hall"]
+
+[node name="HallArt" type="Polygon2D" parent="Hall"]
+polygon = PackedVector2Array(-70, 30, 70, 30, 70, -40, -70, -40)
+color = Color(0.322, 0.376, 0.443, 1)
+
+[node name="Maren" parent="." instance=ExtResource("2_maren")]
+position = Vector2(160, 320)
+
+[node name="Ivo" parent="." instance=ExtResource("3_ivo")]
+position = Vector2(400, 360)
+
+[node name="Villager" parent="." instance=ExtResource("4_villager")]
+position = Vector2(620, 340)
+
+[node name="Odile" parent="." instance=ExtResource("5_npc")]
+position = Vector2(240, 220)
+npc_id = "odile"
+display_name = "Odile"
+body_color = Color(0.851, 0.627, 0.4, 1)
+
+[node name="Vell" parent="." instance=ExtResource("5_npc")]
+position = Vector2(360, 220)
+npc_id = "vell"
+display_name = "Sister Vell"
+body_color = Color(0.486, 0.647, 0.722, 1)
+
+[node name="Ferrow" parent="." instance=ExtResource("5_npc")]
+position = Vector2(480, 220)
+npc_id = "ferrow"
+display_name = "Old Ferrow"
+stubborn = true
+body_color = Color(0.78, 0.49, 0.35, 1)
+
+[node name="Chapel" parent="." instance=ExtResource("11_chapel")]
+position = Vector2(790, 150)
+
+[node name="PromiseBoard" type="Node" parent="."]
+script = ExtResource("9_board")
+
+[node name="NightStats" type="Node" parent="."]
+script = ExtResource("10_stats")
+
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(320, 180)
+script = ExtResource("7_camera")
+target_path = NodePath("../Maren")
+
+[node name="KeeperSwitch" type="Node" parent="."]
+script = ExtResource("6_switch")
+camera_path = NodePath("../Camera2D")
+keeper_paths = Array[NodePath]([NodePath("../Maren"), NodePath("../Ivo")])
+
+[node name="Tint" type="CanvasModulate" parent="."]
+script = ExtResource("8_tint")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="KeeperHud" parent="UI" instance=ExtResource("12_hud")]
+
+[node name="DawnSummary" parent="UI" instance=ExtResource("13_summary")]
