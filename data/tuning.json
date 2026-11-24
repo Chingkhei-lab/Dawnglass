@@ -25,6 +25,19 @@
   },
   "lighting": {
     "lantern_radius": 96.0,
-    "glint_charges": 3
+    "glint_charges": 3,
+    "glint_radius": 112.0,
+    "glint_duration": 4.0,
+    "obstacle_layer": 2
+  },
+  "shadow": {
+    "starting": 1.0,
+    "maximum": 1.0,
+    "dawnglass_loss_rate": 0.05,
+    "sunlight_recovery_rate": 0.02,
+    "low_threshold": 0.3,
+    "max_drop": 0.1,
+    "glint_cost": 0.05,
+    "flicker_speed": 6.0
   }
 }

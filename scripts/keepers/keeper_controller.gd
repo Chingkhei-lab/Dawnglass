@@ -1,13 +1,17 @@
 extends CharacterBody2D
 
 signal interacted(text: String)
+signal glint_fired(charges_left: int)
 
+const GLINT_SCENE := preload("res://scenes/lights/glint_burst.tscn")
 const KEY_BINDINGS := {
 	"move_left": KEY_A,
 	"move_right": KEY_D,
 	"move_up": KEY_W,
 	"move_down": KEY_S,
 	"interact": KEY_E,
+	"lantern": KEY_F,
+	"glint": KEY_Q,
 }
 const AXIS_BINDINGS := [
 	["move_left", JOY_AXIS_LEFT_X, -1.0],
@@ -17,20 +21,38 @@ const AXIS_BINDINGS := [
 ]
 const BUTTON_BINDINGS := [
 	["interact", JOY_BUTTON_A],
+	["lantern", JOY_BUTTON_B],
+	["glint", JOY_BUTTON_X],
 ]
 
 @export var speed_path := "movement.keeper_speed"
 @onready var interaction_probe: Area2D = $InteractionProbe
 
+var glint_charges := 0
+var _shadow: Node = null
+var _lantern: PointLight2D = null
+var _elapsed := 0.0
+
 func _ready() -> void:
 	_bind_input()
+	_shadow = get_node_or_null("ShadowComponent")
+	_lantern = get_node_or_null("Lantern") as PointLight2D
+	glint_charges = int(Data.require_value("lighting.glint_charges"))
+	_apply_lantern_radius()
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	_elapsed += delta
 	var direction := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	velocity = direction * float(Data.require_value(speed_path))
 	move_and_slide()
 	if Input.is_action_just_pressed("interact"):
 		try_interact()
+	if Input.is_action_just_pressed("lantern"):
+		set_lantern(not is_lantern_on())
+	if Input.is_action_just_pressed("glint"):
+		fire_glint()
+	_update_shadow(delta)
+	queue_redraw()
 
 func try_interact() -> bool:
 	var target := _nearest_interactable()
@@ -38,6 +60,52 @@ func try_interact() -> bool:
 		return false
 	interacted.emit(target.interact())
 	return true
+
+func set_lantern(enabled: bool) -> void:
+	if _lantern == null:
+		return
+	_lantern.enabled = enabled
+
+func is_lantern_on() -> bool:
+	return _lantern != null and _lantern.enabled
+
+func fire_glint() -> bool:
+	if glint_charges <= 0:
+		return false
+	glint_charges -= 1
+	var burst := GLINT_SCENE.instantiate()
+	get_tree().current_scene.add_child(burst)
+	burst.global_position = global_position
+	burst.configure(
+		float(Data.require_value("lighting.glint_radius")),
+		float(Data.require_value("lighting.glint_duration")),
+		int(Data.require_value("lighting.obstacle_layer"))
+	)
+	if _shadow != null:
+		_shadow.apply_cost(float(Data.require_value("shadow.glint_cost")))
+	glint_fired.emit(glint_charges)
+	return true
+
+func _update_shadow(delta: float) -> void:
+	if _shadow == null:
+		return
+	if _is_exposed():
+		_shadow.apply_exposure(delta)
+	elif Clock.phase == Clock.PHASE_DAY:
+		_shadow.recover(delta)
+
+func _is_exposed() -> bool:
+	for field in get_tree().get_nodes_in_group("daylight_fields"):
+		if field.has_method("is_point_lit") and field.is_point_lit(global_position):
+			return true
+	return false
+
+func _apply_lantern_radius() -> void:
+	if _lantern == null:
+		return
+	var radius := float(Data.require_value("lighting.lantern_radius"))
+	if _lantern.texture != null:
+		_lantern.texture_scale = radius * 2.0 / float(_lantern.texture.get_width())
 
 func _nearest_interactable() -> Node:
 	var best: Node = null
@@ -89,7 +157,10 @@ func _button_event(button: JoyButton) -> InputEventJoypadButton:
 	return event
 
 func _draw() -> void:
-	draw_colored_polygon(_ellipse(Vector2(0, 0), Vector2(9, 3.5)), Color("#141B29"))
+	var shadow_alpha := 0.8
+	if _shadow != null:
+		shadow_alpha = _shadow.visual_alpha(_elapsed)
+	draw_colored_polygon(_ellipse(Vector2(0, 0), Vector2(9, 3.5)), Color(0.078, 0.106, 0.161, shadow_alpha))
 	draw_rect(Rect2(-7, -18, 14, 18), Color("#7CA5B8"))
 	draw_circle(Vector2(0, -22), 7.0, Color("#F4F7FA"))
 

@@ -11,7 +11,7 @@ config_version=5
 [application]
 
 config/name="Dawnglass"
-run/main_scene="res://scenes/debug/m2_clock.tscn"
+run/main_scene="res://scenes/debug/m3_lights.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
@@ -32,11 +32,9 @@ window/size/viewport_height=360
 window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
-window/stretch/aspect="keep"
 
 [physics]
 
-common/physics_ticks_per_second=60
 3d/physics_engine="Jolt Physics"
 
 [rendering]
