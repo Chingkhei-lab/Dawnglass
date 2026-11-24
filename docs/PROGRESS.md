@@ -4,10 +4,10 @@
 > Status: ✅ done (tested in a real run) · 🟡 in progress · ⬜ not started · ⛔ blocked
 
 ## Current status
-- **Current module:** M4: Creatures ✅ complete and tested in a real run
-- **Next step:** M5: The lighthouse beam (after the human's go-ahead)
+- **Current module:** M5: The lighthouse beam ✅ complete and tested in a real run
+- **Next step:** M6: Switching keepers (after the human's go-ahead)
 - **Godot version installed:** 4.7.2.stable.official.ed1daf0bf (via Godot MCP `get_godot_version`; renderer Forward+, D3D12, AMD Radeon Graphics)
-- **Waiting on the human for:** go-ahead to start M5
+- **Waiting on the human for:** go-ahead to start M6
 
 ---
 
@@ -20,7 +20,7 @@
 | M2: Day and night clock | ✅ | Clock runs day→dusk→night→dawn from tuning (720/45/300/45 s, cycle 1110 s); `CanvasModulate` blends palette colours through dusk and dawn; Dawnglass charges to 100% by nightfall; debug readout shows day, phase, phase time and charge. 13 checks pass; three-minute windowed run clean. |
 | M3: Lights and shadows | ✅ | Lantern `PointLight2D` with cast shadows and no gameplay effect; Glint bursts with charges, shadow cost and a wall-aware `DaylightCheck` raycast; `ShadowComponent` with value/maximum, exposure loss, sunlight recovery, the 30% maximum drop and the three visible stages. 26 checks pass; three-minute windowed run clean; M1/M2 re-verified. |
 | M4: Creatures (2 types) | ✅ | Walker chases the nearest person; Lurker waits in dark and rushes a nearby person or a lit lantern within its notice range; both ignore lantern light; Glint daylight destroys them; contact turns a person into a GameState-marked Sleeper and fires `person_taken`; keeper shadow leans toward nearby creatures. 22 checks pass; windowed run includes a 40-creature FPS sample. |
-| M5: The lighthouse beam | ⬜ | |
+| M5: The lighthouse beam | ✅ | Staffed lamp room drives a daylight beam with mouse/right-stick aim, limited turn speed and acceleration (240 deg/s² to 90 deg/s), a focused narrow mode, a predictable auto sweep with a 120° gap, and a rock-occluded cone; the beam drains stored Dawnglass and the operator's shadow, and the Dawn Pulse ring destroys creatures at a large charge/shadow cost. 31 checks pass; three-minute windowed run clean. |
 | M6: Switching keepers | ⬜ | |
 | 🚦 Gate 1: Is the core fun? | ⬜ | Needs the human to play |
 | M7: Townsfolk, the Hall and promises | ⬜ | |
@@ -30,16 +30,14 @@
 | 🚦 Gate 2: The slice | ⬜ | Needs the human to play |
 
 ### Tests for the current module
-- ✅ Villager starts as a takeable person; keeper is also a takeable person and exposes shadow lean.
-- ✅ Walker closes on the nearest person and retargets correctly (79.3 px in 2 s).
-- ✅ A lit lantern does not divert the Walker; it stays on the nearest person and does not take them from a distance.
-- ✅ An unlit lantern is ignored by the Lurker (hidden, no drift); a lit lantern within 140 px makes it rush the lantern holder.
-- ✅ A person within the Lurker trigger radius (120 px) makes it rush immediately.
-- ✅ Lantern light leaves both creatures alive after 30 frames; a Glint burst destroys both within 4 frames.
-- ✅ A Walker reaching a villager turns them into a Sleeper: body stays, no longer takeable, id `villager` in `GameState.sleepers`, `person_taken` fired once, creature leaves.
-- ✅ Shadow lean is non-zero and points at a creature 50 px away (3.2 px offset) and returns to zero beyond 80 px.
-- ✅ Readout shows creature and sleeper counts.
-- ✅ Three-minute windowed run: 22/22 PASS plus the 40-creature spawn and FPS checks (average 60 FPS), `M4 RUNTIME CHECK COMPLETE`, no `ERROR`/`WARNING` lines. M1 (16/16), M2 (13/13) and M3 (26/26) re-run with no regressions.
+- ✅ Beam is a daylight field; a keeper inside the lamp room operates it; the focus action is registered; it starts under player control.
+- ✅ Turn weight: 240 deg/s² first-frame acceleration, no snap (0.07° in one frame), settles on the aim angle (0.00° off), top speed 90 deg/s — all from tuning.
+- ✅ Daylight check: clears a point 140 px out, is blocked by the rock, respects the 320 px range and the 10° cone; the lamp room itself is exempt so the operator is not lit by their own beam.
+- ✅ Costs: 0.005 Dawnglass and 0.02 operator shadow over 2 s; the beam stops at zero Dawnglass and never goes negative; it resumes when charge returns.
+- ✅ Auto sweep: stays within 30–150°, reaches both ends, reverses exactly once per leg, pauses 1 s at ends, and never lights the gap sector.
+- ✅ Dawn Pulse: fires, spends 0.50 Dawnglass and 0.20 operator shadow immediately, destroys the creatures at 150 px and 250 px, spares the one at 500 px, and clears its field.
+- ✅ Readout shows beam angle, mode, focus, Dawnglass and operator shadow.
+- ✅ Three-minute windowed run: 31/31 PASS, `M5 RUNTIME CHECK COMPLETE`, no `ERROR`/`WARNING` lines. The runtime auto-sweeps and spawns Walkers into the sweep for a live beam-kill demo. M1 (16/16), M2 (13/13), M3 (26/26) and M4 (22/22) re-run with no regressions.
 
 ---
 
@@ -61,6 +59,11 @@
 | 2026-11-24 | GAME_BIBLE §7.4 | Whether creatures die in ordinary daytime sunlight (as opposed to Dawnglass light) is not specified. | Only Dawnglass daylight (Glint now, beam later) kills them; daytime hiding/spawning arrives with later modules. | Open |
 | 2026-11-24 | GAME_BIBLE §7.4 | Which people creatures can take is not narrowed down. | Any takeable node in the `persons` group (keepers and villagers); Sleepers are ignored. | Open |
 | 2026-11-24 | AGENT_BUILD_GUIDE §5 M4 | The "steady 60 FPS" test has no measurement rule. | Windowed run spawns 40 Walkers (contact disabled so they stay alive) and averages `Engine.get_frames_per_second()` over 600 frames after a 1 s warmup; floor is `creatures.fps_target` = 55. Fast headless runs skip it. | Open |
+| 2026-11-24 | GAME_BIBLE §6.2 | Beam range, cone width, turn speed/acceleration and the draw rates are not given. | 320 px range, 10° half-angle, 90 deg/s with 240 deg/s² acceleration, 0.0025 Dawnglass/s and 0.01 operator shadow/s. | Open |
+| 2026-11-24 | GAME_BIBLE §6.2 | "Can be focused" is not defined, and no focus key is given. | Focus narrows the half-angle to 5° and multiplies both draw rates by 1.5; bound to Shift / right mouse button (provisional). | Open |
+| 2026-11-24 | GAME_BIBLE §6.2 | The "slow, predictable sweep with gaps" has no pattern, limits or pause. | Triangle sweep 30–150° at 30°/s with a 1 s pause at each end; the 120° sector outside those limits is the permanent gap. M6 will drive auto mode when the player switches keepers. | Open |
+| 2026-11-24 | GAME_BIBLE §6.3 | Dawn Pulse radius, duration, ring width and costs are not specified. | 320 px radius expanding over 1.2 s in a 14 px band; 0.50 stored Dawnglass and 0.20 operator shadow per use. | Open |
+| 2026-11-24 | GAME_BIBLE §6.2 | Whether the operator is lit by the beam they are aiming is not stated. | Points within the 24 px lamp-room radius are exempt, so the beam drains the operator only through its explicit cost, never twice. | Open |
 
 ## Decisions made
 | Date | Decision | Why |
@@ -79,6 +82,11 @@
 | 2026-11-24 | Person protocol via the `persons` group: `is_takeable()` and `take_shadow()`. | Let creatures work with any takeable actor (keeper or stand-in villager) without type coupling; Sleepers are skipped. |
 | 2026-11-24 | `Sleeper` state stored as id strings in `GameState.sleepers`; `Events.person_taken` keeps its no-argument signature. | Matches the existing signal and gives later modules a simple save-friendly list. |
 | 2026-11-24 | `villager.tscn` is a minimal stand-in for M4 only. | M7 replaces it with the real townsfolk and routines; the person protocol already matches. |
+| 2026-11-24 | `run/main_scene` points at `scenes/debug/m5_beam.tscn` during M5. | Same main-scene convention as earlier modules. |
+| 2026-11-24 | Beam staffing is physical: the operator must be a `CharacterBody2D` in the `persons` group inside the lamp room's `Area2D`. | No motor; matches the bible rule that a person turns the beam, and works with the M6 switch untouched. |
+| 2026-11-24 | The beam joins `daylight_fields` while staffed, but exempts the lamp-room radius. | Creatures die through the same `DaylightCheck` path used by the Glint; the operator's loss is paid once, by the beam's explicit drain. |
+| 2026-11-24 | Turning uses a braking clamp (`sqrt(2 * accel * distance)`) on top of the speed limit. | Without it the beam overshot the aim angle by tens of degrees and oscillated; now it settles exactly. |
+| 2026-11-24 | Dawn Pulse is an expanding annulus field; costs are paid on fire. | Matches "ring of daylight" and keeps the cost check exact, independent of ring travel. |
 
 ## Known bugs
 | Date found | Bug | Status |
@@ -88,6 +96,8 @@
 | 2026-11-24 | `Clock` was declared before `Data` in autoloads, so startup saw an empty tuning dictionary and the clock ran a 0 s cycle. | Fixed: `Data` moved to the first autoload slot; zero-length phases are also ignored safely. |
 | 2026-11-24 | `const PHASE_ORDER := PackedStringArray([...])` failed to parse in Godot 4.7 (`isn't a constant expression`). | Fixed: plain array constant. |
 | 2026-11-24 | `shadow_lean()` failed to parse: `nearest` was typed `Node`, so `(nearest.global_position - global_position)` had no inferred type. | Fixed: keep the nearest creature in a `Node2D` variable (cast from the group array). |
+| 2026-11-24 | First beam steering overshot the target by tens of degrees and oscillated (speed cap applied without braking distance). | Fixed: desired speed is also clamped to `sqrt(2 * accel * |delta angle|)`. |
+| 2026-11-24 | M5 readout and test failed to parse on `shadow.value` / `get_node_or_null` results typed as Variant. | Fixed: explicit `Node` and `float` annotations. |
 
 ## Playtest notes (from the human)
 _Feedback from each 🚦 gate goes here._
@@ -107,3 +117,4 @@ _Feedback from each 🚦 gate goes here._
 | 2026-11-24 | Committed and pushed the M0/M1 baseline to GitHub (`7c7bc96`), then built M2. Added the `clock` tuning block, full `Clock` autoload (day→dusk→night→dawn, two-stage smooth sky tint, Dawnglass charging, `Events` signals), `day_night_tint.gd`, `clock_readout.gd`, `scenes/debug/m2_clock.tscn` and a 13-check driven harness. Fixed two runtime bugs: autoload order (`Clock` read before `Data`) and a non-constant `PackedStringArray` const. Headless and windowed runs: 13/13 PASS, cycle 1110.00 s vs configured 1110.00 s, three-minute runtime clean, no `ERROR`/`WARNING` lines. | Wait for the human's go-ahead, then M3. |
 | 2026-11-24 | M3 completed. Added `DaylightCheck` (range + angle + wall raycast), `ShadowComponent` (value/maximum, exposure loss, sunlight recovery, the 30% maximum drop, stage and flicker alphas), a cast-shadow lantern `PointLight2D`, Glint bursts with charges and shadow cost, the reusable `maren.tscn` keeper, `shadow_readout.gd`, `scenes/debug/m3_lights.tscn` and a 26-check harness. 26/26 PASS headless and windowed; three-minute runtime clean; M1 (16/16) and M2 (13/13) re-run with no regressions. | Wait for the human's go-ahead, then M4. |
 | 2026-11-24 | M4 completed. Added `creature_base.gd` (group registration, daylight death via `daylight_fields`, nearest-person search, distance contact), `walker.gd` (chases nearest person), `lurker.gd` (hidden until a person enters 120 px or a lit lantern enters 140 px), a `persons` protocol (`is_takeable`/`take_shadow`) on the keeper plus `villager.tscn`, `GameState.sleepers` with `mark_sleeper`, keeper shadow lean, `creature_readout.gd`, `scenes/debug/m4_creatures.tscn` and a 22-check harness; windowed runtime adds a 40-creature FPS sample. 22/22 PASS headless and windowed. | Wait for the human's go-ahead, then M5. |
+| 2026-11-24 | M5 completed. Added `beam.gd` (lamp-room staffing, mouse/right-stick aim with speed and acceleration limits plus braking, focus mode, clamped auto sweep with end pauses, cone/range/occlusion daylight check, Dawnglass and operator drain) and `dawn_pulse.gd` (expanding annulus daylight ring with charge/shadow cost), lighthouse debug scene with a rock occluder, `beam_readout.gd` and a 31-check harness. 31/31 PASS headless; three-minute windowed runtime clean with Walkers spawned into the sweeping beam. | Wait for the human's go-ahead, then M6 (Gate 1 comes after M6). |
